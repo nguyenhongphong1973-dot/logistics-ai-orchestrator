@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logistics AI Orchestrator — CEO-AI + 9 Agent</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <h1>Logistics AI Orchestrator</h1>
+  <p class="subtitle">CEO-AI điều phối · 9 agent nghiệp vụ · 1 bảng ticket trung tâm</p>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="tab-board">Bảng Ticket</button>
+    <button class="tab-btn" data-tab="tab-kpi">KPI / Báo cáo</button>
+    <button class="tab-btn" data-tab="tab-agents">Thư viện Prompt</button>
+    <button class="tab-btn" data-tab="tab-risk">Nguyên tắc rủi ro</button>
+  </nav>
+</header>
+
+<main>
+  <section id="tab-board" class="tab-panel active">
+    <div class="toolbar">
+      <button id="btnNewTicket" class="primary">+ Tạo ticket</button>
+      <select id="filterAgent"></select>
+      <select id="filterPriority">
+        <option value="">Tất cả mức ưu tiên</option>
+        <option value="HIGH">HIGH</option>
+        <option value="MED">MED</option>
+        <option value="LOW">LOW</option>
+      </select>
+      <div class="spacer"></div>
+      <button id="btnExport">Xuất JSON</button>
+      <label class="import-label">
+        Nhập JSON
+        <input type="file" id="fileImport" accept="application/json" hidden>
+      </label>
+    </div>
+    <div id="board" class="board"></div>
+  </section>
+
+  <section id="tab-kpi" class="tab-panel">
+    <div id="kpi"></div>
+  </section>
+
+  <section id="tab-agents" class="tab-panel">
+    <p class="muted">
+      Copy nguyên khối prompt của từng agent vào ô "System prompt" / "Custom instructions"
+      của Project (hoặc Skill) tương ứng. Mỗi agent một Project riêng, KHÔNG gộp chung.
+    </p>
+    <div id="agentLibrary"></div>
+  </section>
+
+  <section id="tab-risk" class="tab-panel">
+    <h2>Nguyên tắc kiểm soát rủi ro</h2>
+    <ol id="riskPrinciples"></ol>
+    <h2>Checklist triển khai</h2>
+    <table class="kpi-table">
+      <thead><tr><th>GĐ</th><th>Nội dung</th><th>Kết quả cần có</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Chuẩn hoá thư mục + biểu mẫu + danh mục khách/tuyến/phí</td><td>Cấu trúc dữ liệu thống nhất</td></tr>
+        <tr><td>1</td><td>Dựng A2 (Docs) và A4 (Tracking) trước</td><td>2 agent chạy thật trên 10 lô hàng</td></tr>
+        <tr><td>2</td><td>Thêm A3 (Customs), A6 (Finance); mở bảng ticket</td><td>CEO-AI điều phối được</td></tr>
+        <tr><td>2</td><td>Quy định ngưỡng escalate bằng tiền và bằng rủi ro</td><td>Văn bản nội bộ 1 trang</td></tr>
+        <tr><td>3</td><td>Nối connector: mail, TMS/ERP, Excel, tracking hãng tàu</td><td>Agent đọc dữ liệu trực tiếp</td></tr>
+        <tr><td>3</td><td>Bật A9 xuất báo cáo tự động</td><td>Báo cáo ngày không cần người gõ</td></tr>
+        <tr><td>4</td><td>Đo KPI, siết SOP, bổ sung A1/A5/A7/A8</td><td>Đủ biên chế 9 agent</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<dialog id="newTicketDialog">
+  <form id="ticketForm">
+    <h2>Tạo ticket mới</h2>
+    <label>Agent
+      <select id="formAssignee" name="assignee" required></select>
+    </label>
+    <label>Input
+      <textarea name="input" rows="2" required placeholder="Dữ liệu/chứng từ đầu vào agent cần"></textarea>
+    </label>
+    <label>Deliverable
+      <input name="deliverable" required placeholder="Kết quả cần giao">
+    </label>
+    <label>Tiêu chí đạt (mỗi dòng một tiêu chí)
+      <textarea name="acceptCriteria" rows="3" required placeholder="Ví dụ:&#10;Đối chiếu đủ 5 chứng từ&#10;Không còn lỗi đỏ"></textarea>
+    </label>
+    <label>Deadline
+      <input type="datetime-local" name="deadline" required>
+    </label>
+    <label>Ưu tiên
+      <select name="priority">
+        <option value="HIGH">HIGH</option>
+        <option value="MED" selected>MED</option>
+        <option value="LOW">LOW</option>
+      </select>
+    </label>
+    <div class="dialog-actions">
+      <button type="button" id="btnCloseDialog">Huỷ</button>
+      <button type="submit" class="primary">Tạo ticket</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="agents.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f4f5f7;
+  --panel: #ffffff;
+  --text: #1a1a1a;
+  --muted: #6b7280;
+  --rule: #e2e4e8;
+  --primary: #2563eb;
+  --danger: #dc2626;
+  --warn: #d97706;
+  --ok: #16a34a;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0f13;
+    --panel: #171a21;
+    --text: rgba(255,255,255,.9);
+    --muted: rgba(255,255,255,.55);
+    --rule: rgba(255,255,255,.12);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+h1, h2, h3 { margin: 0 0 6px; }
+.topbar {
+  background: var(--panel);
+  border-bottom: 1px solid var(--rule);
+  padding: 16px 24px;
+}
+.subtitle { margin: 0 0 12px; color: var(--muted); }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab-btn {
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 13px;
+}
+.tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+main { padding: 20px 24px; max-width: 1400px; margin: 0 auto; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.toolbar .spacer { flex: 1; }
+select, input, textarea {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 6px 8px;
+  font: inherit;
+}
+button {
+  border: 1px solid var(--rule);
+  background: var(--panel);
+  color: var(--text);
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+button.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+button:hover { filter: brightness(1.08); }
+.import-label {
+  border: 1px solid var(--rule);
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--panel);
+}
+
+.board { display: flex; gap: 12px; overflow-x: auto; align-items: flex-start; }
+.column {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  min-width: 270px;
+  flex: 1;
+  max-height: calc(100vh - 220px);
+  display: flex;
+  flex-direction: column;
+}
+.column-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--rule);
+  font-weight: 600;
+  font-size: 13px;
+}
+.column-head .count { color: var(--muted); font-weight: 400; }
+.column-body { padding: 10px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+
+.card {
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--muted);
+  border-radius: 6px;
+  padding: 10px;
+  background: var(--bg);
+  font-size: 12.5px;
+}
+.card.priority-high { border-left-color: var(--danger); }
+.card.priority-med { border-left-color: var(--warn); }
+.card.priority-low { border-left-color: var(--ok); }
+.card.late { box-shadow: 0 0 0 2px var(--danger) inset; }
+
+.card-head { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.tag {
+  font-size: 10.5px;
+  border-radius: 4px;
+  padding: 2px 6px;
+  background: var(--rule);
+  color: var(--text);
+}
+.tag-agent { background: var(--primary); color: #fff; }
+.tag-late { background: var(--danger); color: #fff; }
+.tag-return { background: var(--warn); color: #fff; }
+.tag-warn { background: var(--warn); color: #fff; }
+
+.card-deliverable { font-weight: 600; margin-bottom: 4px; }
+.card-input { color: var(--muted); margin-bottom: 6px; }
+.card-criteria { margin: 0 0 6px; padding-left: 18px; }
+.card-deadline { color: var(--muted); margin-bottom: 8px; }
+
+.confidence-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.confidence-row input { width: 70px; }
+.btn-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.btn-row button { flex: 1; font-size: 12px; padding: 5px 6px; }
+.btn-pass { background: var(--ok); border-color: var(--ok); color: #fff; }
+.btn-return { background: var(--warn); border-color: var(--warn); color: #fff; }
+.btn-escalate { background: var(--danger); border-color: var(--danger); color: #fff; }
+.card-actions button:not(.btn-pass, .btn-return, .btn-escalate) { width: 100%; }
+
+.card-footer { display: flex; justify-content: space-between; margin-top: 4px; }
+.link-btn { background: none; border: none; color: var(--primary); padding: 0; font-size: 11.5px; }
+.link-btn.danger { color: var(--danger); }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.kpi-card { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 14px; text-align: center; }
+.kpi-value { font-size: 26px; font-weight: 700; }
+.kpi-label { color: var(--muted); font-size: 12px; }
+.kpi-card.kpi-danger .kpi-value { color: var(--danger); }
+.kpi-card.kpi-warn .kpi-value { color: var(--warn); }
+
+.kpi-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+.kpi-table th, .kpi-table td { border: 1px solid var(--rule); padding: 8px; text-align: left; font-size: 13px; }
+.kpi-table th { background: var(--panel); }
+
+.agent-block { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+.agent-head { display: flex; justify-content: space-between; align-items: center; }
+.copy-btn { font-size: 12px; }
+.agent-block pre {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 12px;
+  white-space: pre-wrap;
+  font: 12px/1.5 "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  max-height: 380px;
+  overflow-y: auto;
+}
+.muted { color: var(--muted); }
+
+dialog {
+  border: none;
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 480px;
+  width: 90%;
+  background: var(--panel);
+  color: var(--text);
+}
+dialog::backdrop { background: rgba(0,0,0,.5); }
+#ticketForm { display: flex; flex-direction: column; gap: 10px; }
+#ticketForm label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+
+@media (max-width: 700px) {
+  .board { flex-direction: column; }
+  .column { max-height: none; }
+}

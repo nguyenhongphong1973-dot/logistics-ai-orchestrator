@@ -2,7 +2,9 @@
 
 Bảng ticket + thư viện prompt cho mô hình **1 CEO-AI điều phối – 9 agent nghiệp vụ** của công ty logistics/forwarding.
 
-Không build, không thư viện ngoài, không gọi mạng. Mở `public/index.html` bằng trình duyệt là chạy — dữ liệu ticket lưu trong `localStorage` của trình duyệt.
+Không build, không thư viện ngoài, không gọi mạng. Mở `docs/index.html` bằng trình duyệt là chạy — dữ liệu ticket lưu trong `localStorage` của trình duyệt.
+
+Repo dùng GitHub Pages phục vụ thẳng thư mục `docs/` (Settings → Pages → Branch `main` → `/docs`).
 
 ## 3 màn hình
 
@@ -30,7 +32,7 @@ Ticket chỉ lưu trong trình duyệt (localStorage) — dùng nút **Xuất JS
 
 ## Thêm/sửa agent
 
-Sửa `public/agents.js` — mỗi agent là một object `{ id, name, short, prompt }`. Không cần build lại.
+Sửa `docs/agents.js` — mỗi agent là một object `{ id, name, short, prompt }`. Không cần build lại.
 
 ## Nguyên tắc không được phá (từ bản gốc)
 

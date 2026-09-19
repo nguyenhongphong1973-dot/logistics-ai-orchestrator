@@ -33,34 +33,7 @@ h1, h2, h3 { margin: 0 0 6px; }
   padding: 16px 24px;
 }
 .subtitle { margin: 0 0 12px; color: var(--muted); }
-.topbar-row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; }
-.user-box { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-
-.auth-screen {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-.auth-box {
-  background: var(--panel);
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  padding: 28px;
-  width: 100%;
-  max-width: 380px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.auth-box h1 { font-size: 18px; }
-.auth-box h2 { font-size: 15px; color: var(--muted); font-weight: 500; }
-.auth-row { display: flex; flex-direction: column; gap: 4px; }
-.auth-row label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
-.auth-error { color: var(--danger); font-size: 12.5px; min-height: 1em; margin: 0; }
-.card-meta { color: var(--muted); font-size: 11px; margin-bottom: 4px; }
 .tab-btn {
   background: none;
   border: 1px solid var(--rule);

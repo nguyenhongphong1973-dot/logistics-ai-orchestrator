@@ -1,5 +1,8 @@
-// Ticket board dùng chung nhiều người — dữ liệu lấy từ /api/* (Cloudflare D1),
-// không còn localStorage. Cần đăng nhập để xem/thao tác.
+// Ticket board cho hệ thống CEO-AI + 9 agent. Lưu toàn bộ trong localStorage
+// của trình duyệt — không cần server, không cần build. Dùng nút Xuất/Nhập
+// JSON để sao lưu hoặc chuyển dữ liệu sang máy khác.
+
+const STORAGE_KEY = 'logistics_ai_tickets_v1';
 
 const STATUS = {
   ASSIGNED: 'ASSIGNED',
@@ -18,93 +21,35 @@ const STATUS_LABEL = {
 };
 
 const COLUMNS = [STATUS.ASSIGNED, STATUS.IN_PROGRESS, STATUS.SUBMITTED, STATUS.DONE, STATUS.ESCALATE];
+
 const PRIORITY_ORDER = { HIGH: 0, MED: 1, LOW: 2 };
 
-let currentUser = null;
-let tickets = [];
-
-async function api(path, options = {}) {
-  const res = await fetch(path, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-  });
-  let body = null;
+function loadTickets() {
   try {
-    body = await res.json();
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
   } catch (e) {
-    /* no body */
+    console.error('Không đọc được dữ liệu ticket', e);
+    return [];
   }
-  if (!res.ok) throw new Error((body && body.error) || `Lỗi ${res.status}`);
-  return body;
 }
 
-// ---------- Auth ----------
-
-async function boot() {
-  const me = await api('/api/me');
-  if (me.user) {
-    currentUser = me.user;
-    await enterApp();
-    return;
-  }
-  const status = await api('/api/setup');
-  showAuthScreen(status.hasUsers ? 'login' : 'setup');
+function saveTickets(tickets) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
 }
 
-function showAuthScreen(mode) {
-  document.getElementById('authScreen').style.display = 'flex';
-  document.getElementById('appScreen').style.display = 'none';
-  document.getElementById('authTitle').textContent =
-    mode === 'setup' ? 'Tạo tài khoản quản trị đầu tiên' : 'Đăng nhập';
-  document.getElementById('authSubmit').textContent = mode === 'setup' ? 'Tạo tài khoản' : 'Đăng nhập';
-  document.getElementById('authNameRow').style.display = mode === 'setup' ? 'flex' : 'none';
-  document.getElementById('authForm').dataset.mode = mode;
-  document.getElementById('authError').textContent = '';
-}
+let tickets = loadTickets();
 
-function initAuthForm() {
-  document.getElementById('authForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const mode = e.target.dataset.mode;
-    const fd = new FormData(e.target);
-    const payload = {
-      username: fd.get('username').trim(),
-      password: fd.get('password'),
-      name: fd.get('name') ? fd.get('name').trim() : undefined,
-    };
-    const errEl = document.getElementById('authError');
-    errEl.textContent = '';
-    try {
-      const endpoint = mode === 'setup' ? '/api/setup' : '/api/login';
-      const result = await api(endpoint, { method: 'POST', body: JSON.stringify(payload) });
-      currentUser = result.user;
-      await enterApp();
-    } catch (err) {
-      errEl.textContent = err.message;
-    }
-  });
-}
-
-async function enterApp() {
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('appScreen').style.display = 'block';
-  document.getElementById('currentUserName').textContent = currentUser.name;
-  await loadTickets();
-  render();
-}
-
-async function logout() {
-  await api('/api/logout', { method: 'POST' });
-  currentUser = null;
-  tickets = [];
-  location.reload();
-}
-
-// ---------- Data loading ----------
-
-async function loadTickets() {
-  const data = await api('/api/tickets');
-  tickets = data.tickets;
+function nextTicketId() {
+  const year = new Date().getFullYear();
+  const prefix = `JOB-${year}-`;
+  const nums = tickets
+    .map((t) => t.id)
+    .filter((id) => id.startsWith(prefix))
+    .map((id) => parseInt(id.slice(prefix.length), 10))
+    .filter((n) => !isNaN(n));
+  const next = (nums.length ? Math.max(...nums) : 0) + 1;
+  return prefix + String(next).padStart(4, '0');
 }
 
 function isLate(ticket) {
@@ -115,34 +60,75 @@ function isLate(ticket) {
 
 function fmtDate(iso) {
   if (!iso) return '—';
-  return new Date(iso).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
+  const d = new Date(iso);
+  return d.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
 }
 
-// ---------- CRUD (qua API) ----------
+function addHistory(ticket, action, note) {
+  ticket.history = ticket.history || [];
+  ticket.history.push({ ts: new Date().toISOString(), action, note: note || '' });
+}
 
-async function createTicket(data) {
-  await api('/api/tickets', { method: 'POST', body: JSON.stringify(data) });
-  await loadTickets();
+// ---------- CRUD ----------
+
+function createTicket(data) {
+  const now = new Date().toISOString();
+  const ticket = {
+    id: nextTicketId(),
+    assignee: data.assignee,
+    input: data.input,
+    deliverable: data.deliverable,
+    acceptCriteria: data.acceptCriteria,
+    deadline: data.deadline,
+    priority: data.priority,
+    status: STATUS.ASSIGNED,
+    confidence: null,
+    note: '',
+    returnCount: 0,
+    createdAt: now,
+    doneAt: null,
+    history: [],
+  };
+  addHistory(ticket, 'CREATE', `Giao cho ${ticket.assignee}`);
+  tickets.unshift(ticket);
+  saveTickets(tickets);
   render();
 }
 
-async function transition(id, newStatus, note) {
-  await api(`/api/tickets/${id}`, { method: 'PATCH', body: JSON.stringify({ status: newStatus, note }) });
-  await loadTickets();
+function findTicket(id) {
+  return tickets.find((t) => t.id === id);
+}
+
+function transition(id, newStatus, note) {
+  const ticket = findTicket(id);
+  if (!ticket) return;
+  if (newStatus === STATUS.IN_PROGRESS && ticket.status === STATUS.SUBMITTED) {
+    // RETURN: trả lại để sửa
+    ticket.returnCount += 1;
+    addHistory(ticket, 'RETURN', note);
+  } else {
+    addHistory(ticket, newStatus, note);
+  }
+  ticket.status = newStatus;
+  if (newStatus === STATUS.DONE) {
+    ticket.doneAt = new Date().toISOString();
+  }
+  saveTickets(tickets);
   render();
 }
 
-async function setConfidence(id, value) {
-  const confidence = value === '' ? null : Math.max(0, Math.min(1, parseFloat(value)));
-  await api(`/api/tickets/${id}`, { method: 'PATCH', body: JSON.stringify({ confidence }) });
-  await loadTickets();
+function setConfidence(id, value) {
+  const ticket = findTicket(id);
+  if (!ticket) return;
+  ticket.confidence = value === '' ? null : Math.max(0, Math.min(1, parseFloat(value)));
+  saveTickets(tickets);
   render();
 }
 
-async function deleteTicket(id) {
+function deleteTicket(id) {
   if (!confirm('Xoá ticket ' + id + '? Không thể hoàn tác.')) return;
-  await api(`/api/tickets/${id}`, { method: 'DELETE' });
-  await loadTickets();
+  tickets = tickets.filter((t) => t.id !== id);
+  saveTickets(tickets);
   render();
 }
 
@@ -185,7 +171,9 @@ function renderCard(t) {
   card.className = 'card priority-' + t.priority.toLowerCase();
   if (isLate(t)) card.classList.add('late');
 
-  const criteriaHtml = (t.acceptCriteria || []).map((c) => `<li>${escapeHtml(c)}</li>`).join('');
+  const criteriaHtml = (t.acceptCriteria || [])
+    .map((c) => `<li>${escapeHtml(c)}</li>`)
+    .join('');
 
   let actions = '';
   if (t.status === STATUS.ASSIGNED) {
@@ -208,10 +196,9 @@ function renderCard(t) {
       </div>`;
   }
 
-  const returnBadge =
-    t.returnCount > 0
-      ? `<span class="tag tag-return">RETURN ×${t.returnCount}${t.returnCount >= 2 ? ' — nên ESCALATE' : ''}</span>`
-      : '';
+  const returnBadge = t.returnCount > 0
+    ? `<span class="tag tag-return">RETURN ×${t.returnCount}${t.returnCount >= 2 ? ' — nên ESCALATE' : ''}</span>`
+    : '';
 
   card.innerHTML = `
     <div class="card-head">
@@ -226,7 +213,6 @@ function renderCard(t) {
     <ul class="card-criteria">${criteriaHtml}</ul>
     <div class="card-deadline">Deadline: ${fmtDate(t.deadline)}</div>
     <div class="card-actions">${actions}</div>
-    <div class="card-meta">Tạo bởi ${escapeHtml(t.createdBy || '—')}</div>
     <div class="card-footer">
       <button class="link-btn" data-act="history">Lịch sử</button>
       <button class="link-btn danger" data-act="delete">Xoá</button>
@@ -279,7 +265,7 @@ function handleCardAction(t, act) {
 
 function showHistory(t) {
   const lines = (t.history || [])
-    .map((h) => `${fmtDate(h.ts)} — ${h.action}${h.note ? ': ' + h.note : ''} (${h.actor || '—'})`)
+    .map((h) => `${fmtDate(h.ts)} — ${h.action}${h.note ? ': ' + h.note : ''}`)
     .join('\n');
   alert(`Lịch sử ${t.id}\n\n${lines || 'Chưa có sự kiện.'}`);
 }
@@ -357,7 +343,7 @@ function populateAssigneeSelect() {
 
 function initForm() {
   const form = document.getElementById('ticketForm');
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
     const fd = new FormData(form);
     const acceptCriteria = fd
@@ -365,47 +351,16 @@ function initForm() {
       .split('\n')
       .map((s) => s.trim())
       .filter(Boolean);
-    try {
-      await createTicket({
-        assignee: fd.get('assignee'),
-        input: fd.get('input'),
-        deliverable: fd.get('deliverable'),
-        acceptCriteria,
-        deadline: fd.get('deadline'),
-        priority: fd.get('priority'),
-      });
-      form.reset();
-      document.getElementById('newTicketDialog').close();
-    } catch (err) {
-      alert('Lỗi tạo ticket: ' + err.message);
-    }
-  });
-}
-
-// ---------- Quản lý tài khoản ----------
-
-function initUserForm() {
-  const form = document.getElementById('userForm');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const fd = new FormData(form);
-    const errEl = document.getElementById('userFormError');
-    errEl.textContent = '';
-    try {
-      await api('/api/users', {
-        method: 'POST',
-        body: JSON.stringify({
-          username: fd.get('username').trim(),
-          password: fd.get('password'),
-          name: fd.get('name').trim(),
-        }),
-      });
-      form.reset();
-      alert('Đã tạo tài khoản. Gửi username/mật khẩu cho đồng nghiệp để họ đăng nhập.');
-      document.getElementById('userDialog').close();
-    } catch (err) {
-      errEl.textContent = err.message;
-    }
+    createTicket({
+      assignee: fd.get('assignee'),
+      input: fd.get('input'),
+      deliverable: fd.get('deliverable'),
+      acceptCriteria,
+      deadline: fd.get('deadline'),
+      priority: fd.get('priority'),
+    });
+    form.reset();
+    document.getElementById('newTicketDialog').close();
   });
 }
 
@@ -443,6 +398,35 @@ function renderAgentLibrary() {
   riskEl.innerHTML = RISK_PRINCIPLES.map((r) => `<li>${escapeHtml(r)}</li>`).join('');
 }
 
+// ---------- Export / Import ----------
+
+function exportJson() {
+  const blob = new Blob([JSON.stringify(tickets, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `tickets-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importJson(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data)) throw new Error('File không đúng định dạng');
+      tickets = data;
+      saveTickets(tickets);
+      render();
+      alert(`Đã nhập ${data.length} ticket.`);
+    } catch (e) {
+      alert('Lỗi đọc file: ' + e.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
 // ---------- Tabs ----------
 
 function initTabs() {
@@ -464,10 +448,9 @@ function render() {
 function init() {
   populateAssigneeSelect();
   initForm();
-  initUserForm();
-  initAuthForm();
   initTabs();
   renderAgentLibrary();
+  render();
 
   document.getElementById('btnNewTicket').addEventListener('click', () => {
     document.getElementById('newTicketDialog').showModal();
@@ -475,23 +458,12 @@ function init() {
   document.getElementById('btnCloseDialog').addEventListener('click', () => {
     document.getElementById('newTicketDialog').close();
   });
-  document.getElementById('btnManageUsers').addEventListener('click', () => {
-    document.getElementById('userDialog').showModal();
-  });
-  document.getElementById('btnCloseUserDialog').addEventListener('click', () => {
-    document.getElementById('userDialog').close();
-  });
-  document.getElementById('btnLogout').addEventListener('click', logout);
   document.getElementById('filterAgent').addEventListener('change', renderBoard);
   document.getElementById('filterPriority').addEventListener('change', renderBoard);
-  document.getElementById('btnRefresh').addEventListener('click', async () => {
-    await loadTickets();
-    render();
-  });
-
-  boot().catch((err) => {
-    console.error(err);
-    showAuthScreen('login');
+  document.getElementById('btnExport').addEventListener('click', exportJson);
+  document.getElementById('fileImport').addEventListener('change', (e) => {
+    if (e.target.files[0]) importJson(e.target.files[0]);
+    e.target.value = '';
   });
 }
 

@@ -2,9 +2,12 @@
 
 Bảng ticket + thư viện prompt cho mô hình **1 CEO-AI điều phối – 9 agent nghiệp vụ** của công ty logistics/forwarding.
 
-Không build, không thư viện ngoài, không gọi mạng. Mở `docs/index.html` bằng trình duyệt là chạy — dữ liệu ticket lưu trong `localStorage` của trình duyệt.
+**Bản dùng chung nhiều người**: đăng nhập + dữ liệu lưu tập trung trên Cloudflare D1 (database),
+chạy qua Cloudflare Pages Functions (`functions/api/*`). Không còn lưu trên `localStorage` từng máy nữa.
 
-Repo dùng GitHub Pages phục vụ thẳng thư mục `docs/` (Settings → Pages → Branch `main` → `/docs`).
+Cách triển khai đầy đủ (tạo database, deploy): xem `DEPLOY.md`.
+
+> Không dùng được với GitHub Pages nữa — GitHub Pages chỉ phục vụ file tĩnh, không chạy được `functions/`.
 
 ## 3 màn hình
 
@@ -26,9 +29,11 @@ ASSIGNED → IN_PROGRESS → SUBMITTED ──PASS──▶ DONE
 
 Ngưỡng escalate theo bản gốc: **độ tin cậy < 0.70**, **RETURN từ lần 2**, hoặc rủi ro tiền/pháp lý vượt phạm vi agent.
 
-## Sao lưu dữ liệu
+## Tài khoản
 
-Ticket chỉ lưu trong trình duyệt (localStorage) — dùng nút **Xuất JSON** để tải file sao lưu, **Nhập JSON** để khôi phục hoặc chuyển sang máy khác.
+- Lần đầu mở app: tạo **tài khoản quản trị đầu tiên** ngay trên màn hình.
+- Sau đó, người đã đăng nhập bấm **Quản lý tài khoản** để tạo tài khoản cho đồng nghiệp.
+- Không phân quyền admin/member — nội bộ 1 công ty dùng chung, ai đăng nhập cũng thao tác được ticket và tạo thêm tài khoản.
 
 ## Thêm/sửa agent
 

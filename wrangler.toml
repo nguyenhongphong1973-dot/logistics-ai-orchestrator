@@ -1,0 +1,8 @@
+name = "logistics-ai-orchestrator"
+compatibility_date = "2026-01-01"
+pages_build_output_dir = "docs"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "logistics_ai_orchestrator"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"

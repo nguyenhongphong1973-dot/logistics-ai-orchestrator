@@ -7,9 +7,44 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<div id="authScreen" class="auth-screen">
+  <form id="authForm" class="auth-box" data-mode="login">
+    <h1>Logistics AI Orchestrator</h1>
+    <h2 id="authTitle">Đăng nhập</h2>
+    <p id="authError" class="auth-error"></p>
+    <div id="authNameRow" class="auth-row">
+      <label>Họ tên
+        <input name="name" placeholder="Tên hiển thị">
+      </label>
+    </div>
+    <div class="auth-row">
+      <label>Tài khoản
+        <input name="username" required autocomplete="username">
+      </label>
+    </div>
+    <div class="auth-row">
+      <label>Mật khẩu
+        <input name="password" type="password" required minlength="6" autocomplete="current-password">
+      </label>
+    </div>
+    <button type="submit" id="authSubmit" class="primary">Đăng nhập</button>
+  </form>
+</div>
+
+<div id="appScreen" style="display:none">
 <header class="topbar">
-  <h1>Logistics AI Orchestrator</h1>
-  <p class="subtitle">CEO-AI điều phối · 9 agent nghiệp vụ · 1 bảng ticket trung tâm</p>
+  <div class="topbar-row">
+    <div>
+      <h1>Logistics AI Orchestrator</h1>
+      <p class="subtitle">CEO-AI điều phối · 9 agent nghiệp vụ · 1 bảng ticket trung tâm</p>
+    </div>
+    <div class="user-box">
+      <span>Xin chào, <b id="currentUserName"></b></span>
+      <button id="btnManageUsers">Quản lý tài khoản</button>
+      <button id="btnLogout">Đăng xuất</button>
+    </div>
+  </div>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="tab-board">Bảng Ticket</button>
     <button class="tab-btn" data-tab="tab-kpi">KPI / Báo cáo</button>
@@ -30,11 +65,7 @@
         <option value="LOW">LOW</option>
       </select>
       <div class="spacer"></div>
-      <button id="btnExport">Xuất JSON</button>
-      <label class="import-label">
-        Nhập JSON
-        <input type="file" id="fileImport" accept="application/json" hidden>
-      </label>
+      <button id="btnRefresh">Làm mới</button>
     </div>
     <div id="board" class="board"></div>
   </section>
@@ -101,6 +132,28 @@
     </div>
   </form>
 </dialog>
+
+<dialog id="userDialog">
+  <form id="userForm">
+    <h2>Tạo tài khoản đồng nghiệp</h2>
+    <p id="userFormError" class="auth-error"></p>
+    <label>Họ tên
+      <input name="name" required placeholder="Tên hiển thị">
+    </label>
+    <label>Tài khoản
+      <input name="username" required autocomplete="off">
+    </label>
+    <label>Mật khẩu (từ 6 ký tự)
+      <input name="password" type="password" required minlength="6" autocomplete="new-password">
+    </label>
+    <div class="dialog-actions">
+      <button type="button" id="btnCloseUserDialog">Huỷ</button>
+      <button type="submit" class="primary">Tạo tài khoản</button>
+    </div>
+  </form>
+</dialog>
+
+</div>
 
 <script src="agents.js"></script>
 <script src="app.js"></script>

@@ -1,0 +1,14 @@
+{
+  "name": "logistics-ai-orchestrator",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Ticket board dùng chung nhiều người cho mô hình CEO-AI + 9 agent logistics",
+  "scripts": {
+    "dev": "wrangler pages dev docs --d1=DB",
+    "db:init:local": "wrangler d1 execute logistics_ai_orchestrator --local --file=schema.sql",
+    "db:init:remote": "wrangler d1 execute logistics_ai_orchestrator --remote --file=schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^4.119.0"
+  }
+}

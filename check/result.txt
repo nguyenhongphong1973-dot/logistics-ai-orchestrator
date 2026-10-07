@@ -1,3 +1,11 @@
+== AZURE
+ping 200 0.140495s
+{"enabled": true, "model": "claude-opus-4-8", "effort": "medium", "today": "", "phucVuAi": {"vietCoMa": 0, "vietVoDanh": 0, "pvCoMa": 0, "pvVoDanh": 0, "ghiOK": 0, "ghiHong": 0, "pvChan": 0}, "usedToday": 0, "dailyMax": 600, "ipHourly": 40, "maxChars": 4000, "totalCalls": 0, "phatAm": {"enabled": true, "region": "southeastasia", "today": "", "usedToday": 0, "dailyMax": 800, "ipHourly": 60, "maxKB": 1200, "totalCalls": 0, "totalAudioSec": 0.0}}
+doc-cau 200 1.580701s 44421B
+ok True vi-VN-HoaiMyNeural None
+access-control-allow-headers: Content-Type
+access-control-allow-methods: GET, POST, OPTIONS
+access-control-allow-origin: *
 == HEALTH
 {"ok":true,"service":"hps-ai","until":"2026-11-30"}
 HTTP 200
@@ -8,7 +16,7 @@ HTTP 200
 302  https://main.cic-survey.pages.dev/bizdata.js
 302  https://cic-survey.pages.dev/api/hps-ai2
 == AI QUICK
-{"type":"message","role":"assistant","content":[{"type":"text","text":"Cảng RoRo Tân Vũ ở thành phố **Hải Phòng**."}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null}
+{"type":"message","role":"assistant","content":[{"type":"text","text":"Cảng RoRo Tân Vũ ở thành phố **Hải Phòng**, Việt Nam."}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null}
 HTTP 200
 == AI DEFAULT
 {"type":"message","role":"assistant","content":[{"type":"text","text":"OK"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null}
@@ -18,12 +26,12 @@ HTTP 200
 HTTP 403
 == PREFLIGHT
 HTTP/2 204 
-date: Wed, 07 Oct 2026 08:59:18 GMT
+date: Wed, 07 Oct 2026 10:05:52 GMT
 access-control-allow-origin: https://nguyenhongphong1973-dot.github.io
 vary: Origin
 access-control-allow-headers: content-type
 access-control-allow-methods: GET, POST, OPTIONS
 access-control-max-age: 86400
-report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=XObAdX4tby0HG5W2jN%2FW0fRncVajtK3YmGTazpUvkhtUt7lTcxkeq17PyoIzGOuBecDUlRCs%2FFi9UnW20Mf09jtyDq7ENx3n%2FFpU6SmJoKrW8Sx9Wy4BJx%2BLusLsSGwXSSfZupjl9w%3D%3D"}]}
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=tUIBjfYasByb0RM%2FhIzPJcAX6%2Fmi6gx7si1IclgmcgRA%2Bav7TZ187757HNu4dkBg6Pi8yGTLWOVD%2Fnf3xsH7EIBr8yqKSUSdrmnU6eU7XQndj366HsPzty5Zvm6om4DP0pAw9QyQOw%3D%3D"}]}
 nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
 server: cloudflare

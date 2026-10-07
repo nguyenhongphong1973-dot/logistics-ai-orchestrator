@@ -5,47 +5,40 @@ HIỆN: 🎙 TMV còn bao nhiêu xe chờ PDI
 ĐÁP: 🎧 Hiểu là: TMV còn bao nhiêu xe chờ PDI.
 
 
-TMV hiện có 30 xe ở trạng thái Chờ PDI, ngoài ra có 7 xe đang PDI. Tổng tồn TMV là 125 xe, trong đó 17 xe đang bị chặn.
-
-Anh nên kiểm tra nhân lực kỹ thuật viên PDI ca tới để xử lý hết 30 xe này trước khi tàu Pacific Bloom V.2610 cập cảng ngày 03/10.
+TMV hiện có 30 xe ở trạng thái Chờ PDI, và 7 xe đang PDI. Anh nên ưu tiên đưa vào PDI những xe có lệnh giao hết hạn hôm nay. Toàn bãi hiện có 10 lệnh như vậy.
 
 NÓI: xe phốt nào tồn quá ba mươi ngày
 HIỆN: 🎙 xe Ford nào tồn quá ba mươi ngày
 ĐÁP: 🎧 Hiểu là: Xe Ford nào tồn quá 30 ngày.
 
 
-Ford có 21 xe tồn trên 30 ngày. Năm xe đầu tiên:
-• Ranger D-04-12, 56 ngày, Chờ PDI (VIN …HLTPEA)
-• Ranger D-05-12, 49 ngày, Sẵn sàng, đang bị chặn HQ (VIN …SRE360)
-• Ranger D-02-01, 41 ngày, Sẵn sàng (VIN …C7G5Y)
-• Everest D-03-11, 37 ngày, Sẵn sàng (VIN …BWMAA5)
-• Territory D-02-04, 32 ngày, Chờ PDI (VIN …PFA47PJ)
+Ford có 21 xe tồn quá 30 ngày. Lâu nhất là Ranger ô D-04-12, 56 ngày, đang Chờ PDI. Tiếp theo là:
+• Ranger D-05-12, 49 ngày, bị chặn HQ
+• Ranger D-02-01, 41 ngày
+• Everest D-03-11, 37 ngày
+• Territory D-02-04, 32 ngày, đang Chờ PDI
 
-Anh nên ưu tiên đưa 2 xe Chờ PDI vào PDI và xin gỡ chặn HQ cho chiếc Ranger D-05-12.
+Anh nên cho làm PDI Ranger D-04-12 trước. Nên xử lý vướng HQ cho xe D-05-12.
 
 NÓI: kho tám đang bị làm sao
 HIỆN: 🎙 Kho 8 đang bị làm sao
 ĐÁP: 🎧 Hiểu là: Kho 8 đang bị làm sao.
 
 
-Kho 8 đang cảnh báo nghiêm trọng. Nhiệt độ hiện -20.2°C, cài -24°C, lệch +3.8°C và đang tăng khoảng 0,64°C/giờ. Khoảng 3,4 giờ nữa sẽ chạm -18°C, ngưỡng hỏng hàng đông lạnh. Nghi đóng băng dàn lạnh hoặc cửa cuốn mở nhiều, và đã báo cấp 1 cho Mr Cường.
-
-Anh nên cho kỹ thuật kiểm tra dàn lạnh và hạn chế mở cửa ngay. Nếu chưa ổn định thì chuẩn bị chuyển hàng sang kho khác.
+Kho 8 đang cảnh báo nghiêm trọng. Nhiệt độ hiện -20.2°C, cài -24°C, lệch +3.8°C. Nhiệt độ đang tăng khoảng 0.64°C/giờ, dự kiến chạm -18°C sau khoảng 3.4 giờ. Nghi đóng băng dàn lạnh hoặc cửa cuốn mở nhiều. Mr Cường đã được báo cấp 1. Anh nên cho kỹ thuật kiểm tra và xả đá dàn lạnh ngay, đồng thời hạn chế mở cửa kho.
 
 NÓI: hàng tê en tê ích nào sắp hết hạn tái xuất
 HIỆN: 🎙 hàng TNTX nào sắp hết hạn tái xuất
 ĐÁP: 🎧 Hiểu là: Hàng TNTX nào sắp hết hạn tái xuất.
 
 
-Gấp nhất là tờ khai …4521 của Chủ hàng B, thịt bò đông lạnh 12 pallet. Còn 9 ngày, đã kiểm dịch, đi Lạng Sơn. Tờ khai gần nhất sau đó là …4610, chân gà 40 pallet, còn 38 ngày. Hai tờ khai còn lại còn trên 60 ngày.
-
-Anh nên chốt lịch xe và thủ tục xuất đi Lạng Sơn cho …4521 sớm.
+Gấp nhất là tờ khai …4521 của Chủ hàng B: thịt bò đông lạnh, 12 pallet, còn 9 ngày. Hàng đã kiểm dịch và đi Lạng Sơn. Tờ khai gần nhất tiếp theo là …4610 (chân gà, 40 pallet), còn 38 ngày. Anh nên cho điều xe và chốt lịch đi Lạng Sơn cho …4521 sớm.
 
 NÓI: bạn đang dùng trí tuệ nhân tạo của hãng nào
 HIỆN: 🎙 bạn đang dùng trí tuệ nhân tạo của hãng nào
 ĐÁP: 🎧 Hiểu là: Bạn đang dùng trí tuệ nhân tạo của hãng nào.
 
 
-Em là Trợ lý AI HPS, tích hợp trong hệ thống HPS. Chi tiết kỹ thuật do đơn vị triển khai cung cấp. Anh cứ hỏi tiếp về công việc, ví dụ bãi xe, kho lạnh, nhân lực hay lịch tàu nhé.
+Em là Trợ lý AI HPS, trợ lý tích hợp trong hệ thống HPS. Chi tiết kỹ thuật do đơn vị triển khai cung cấp. Anh cần hỏi tiếp về xe trong bãi, kho lạnh, nhân lực hay lịch tàu thì cứ nói em nhé.
 
 errs=[]

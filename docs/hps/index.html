@@ -1399,7 +1399,9 @@ const VGLOSS='Từ điển thuật ngữ khi người dùng NÓI (nhận dạng 
 /* ---- VOICE: speak the question, hear the answer ---- */
 const SRc=window.SpeechRecognition||window.webkitSpeechRecognition;
 let micRec=null, voiceTurn=false, voiceAlts=[];
-function speak(t){try{if(!window.speechSynthesis||!t)return;const u=new SpeechSynthesisUtterance(String(t).replace(/^(Hiểu là|Understood as):.*$/m,'').replace(/\*\*/g,'').replace(/[•#]/g,'').slice(0,600));u.lang=lang==='en'?'en-US':'vi-VN';const v=speechSynthesis.getVoices().find(x=>x.lang&&x.lang.toLowerCase().startsWith(lang==='en'?'en':'vi'));if(v)u.voice=v;u.rate=1.05;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+function pickVoice(){try{const vs=speechSynthesis.getVoices()||[];const want=lang==='en'?'en':'vi';const c=vs.filter(v=>v.lang&&v.lang.toLowerCase().replace('_','-').startsWith(want));if(!c.length)return null;const score=v=>(/natural|neural|online/i.test(v.name)?4:0)+(/hoaimy|hoài my|namminh|linh|google/i.test(v.name)?2:0)+(v.localService?0:1);return c.sort((x,y)=>score(y)-score(x))[0]}catch(e){return null}}
+try{if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{}}catch(e){}
+function speak(t){try{if(!window.speechSynthesis||!t)return;const v=pickVoice();if(!v){const h=document.getElementById('michint');if(h)h.textContent=L('Máy này chưa có giọng đọc tiếng Việt nên chỉ hiện chữ.','No voice for this language on this device, showing text only.');return}const u=new SpeechSynthesisUtterance(String(t).replace(/^(Hiểu là|Understood as):.*$/m,'').replace(/\*\*/g,'').replace(/[•#🎧🎙]/g,'').replace(/…(\d{4})/g,' đuôi $1').slice(0,600));u.voice=v;u.lang=v.lang;u.rate=1;u.pitch=1;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
 function bindMic(){const b=document.getElementById('micbtn'),h=document.getElementById('michint');if(!b)return;
   if(!SRc){b.style.display='none';return}
   b.onclick=()=>{

@@ -1119,7 +1119,7 @@ function proxySample(url){
     const tools=opt.tools?opt.tools.map(t=>({name:t.name,description:t.description,input_schema:t.inputSchema||{type:'object',properties:{}}})):undefined;
     let text='';
     for(let round=0;round<6;round++){
-      const res=await call({messages:msgs,tools:round<5?tools:undefined,max_tokens:1200,tier:opt.modelTier||'default'});
+      const res=await call({system:opt.system,messages:msgs,tools:round<5?tools:undefined,max_tokens:1200,tier:opt.modelTier||'default'});
       const tb=(res.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
       if(tb){text+=(text?'\n\n':'')+tb;opt.onText&&opt.onText({text,delta:tb})}
       if(res.stop_reason!=='tool_use'||!opt.tools)break;
@@ -1134,6 +1134,7 @@ function proxySample(url){
     const r=await s(inp,opt);const t=r.text.trim();const tries=[t,(t.match(/```(?:json)?\s*([\s\S]*?)```/)||[])[1],t.slice(Math.min(...['{','['].map(c=>t.indexOf(c)).filter(i=>i>=0)),Math.max(t.lastIndexOf('}'),t.lastIndexOf(']'))+1)];
     for(const x of tries){if(!x)continue;try{return JSON.parse(x)}catch(e){}}throw {code:'invalid_json',text:r.text}};
   s.limits=async()=>({maxPromptBytes:262144,images:{maxCount:4,maxInputBytes:2e7,mediaTypes:['image/jpeg','image/png','image/webp']},tools:{maxCount:12}});
+  s.__proxy=true;
   return s;
 }
 
@@ -1284,7 +1285,7 @@ function snapshot(){
   const lines=[`Ngày: ${dd(0)}/2026. Đơn vị: HPS – Công ty CP Dịch vụ Cảng Hải Phòng, Lô KB1-1 KCN Nam Đình Vũ. Bãi xe nhận xe RoRo từ cảng Tân Vũ (~7 km đường bộ), kho lạnh, tàu lai, hàng siêu trường siêu trọng.`];
   for(const o of Object.keys(OEMS)){const a=by(o);lines.push(`${o} (${OEMS[o].name}, khu ${OEMS[o].zones.join('/')}): tồn ${a.length}; `+Object.keys(ST).map(s=>`${s} ${cnt(a,v=>v.status===s)}`).join(', ')+`; bị chặn ${cnt(a,v=>v.holds.length)}; >30 ngày ${cnt(a,v=>v.arr>30)}; xuất trong 7 ngày ${cnt(a,v=>v.out<=7&&!v.holds.length)}.`)}
   lines.push(`Sức chứa sơ đồ: 4 khu × ${ZR*ZC} ô. Xe đến hạn bảo dưỡng tồn: ${V.filter(mDue).length}. Lệnh giao hết hạn hôm nay: ${V.filter(v=>v.due===0).length}.`);
-  ROOMS.forEach(r=>{const sl=(r.s[23]-r.s[19])/4;lines.push(`${r.k}: hiện ${r.now}°C, cài ${r.sp}°C, xu hướng ${sl.toFixed(2)}°C/giờ (4 giờ qua).`)});
+  ROOMS.forEach(r=>{const sl=(r.s[23]-r.s[19])/4,dev=r.now-r.sp,frz=r.sp<=-18;const eta=frz&&sl>0.05?(-18-r.now)/sl:null;const st=(dev>2||sl>0.3)?((eta!=null&&eta<6)||dev>4?'CẢNH BÁO NGHIÊM TRỌNG':'CẢNH BÁO'):'ổn định';lines.push(`${r.k}: ${st}. Hiện ${r.now}°C, cài ${r.sp}°C (lệch ${dev>0?'+':''}${dev.toFixed(1)}°C), xu hướng ${sl>0?'+':''}${sl.toFixed(2)}°C/giờ trong 4 giờ qua${eta!=null?`, dự báo chạm −18°C (ngưỡng hỏng hàng đông lạnh) sau khoảng ${eta.toFixed(1)} giờ`:''}.${st!=='ổn định'&&r.k==='Kho 8'?' Đã báo cấp 1: Mr Cường. Nghi đóng băng dàn lạnh hoặc cửa cuốn nhanh mở nhiều.':''}`)});
   lines.push('Tờ khai TNTX: '+TNTX.map(t=>`${t[0]} ${t[1]} ${t[2]} ${t[3]} pallet, còn ${t[5]} ngày, ${t[6]}, đi ${t[7]}`).join('; '));
   lines.push('Lịch tàu RoRo sắp tới: '+VSCHED.map(v=>`${v.ship} ETA ${dd(v.d)} ${v.h}:00, ${v.n} xe`).join('; '));
   lines.push('Lai dắt hôm nay: '+MOVES.map(m=>`${m.t} ${m.ship} ${m.tugs&&m.tugs.length?'đã có '+m.tugs.join('+'):'chưa phân công'}`).join('; '));
@@ -1309,8 +1310,8 @@ const AITOOLS=[
   execute(i){const r=ROOMS.find(x=>x.k.replace(/\s/g,'').toLowerCase()===String(i.room||'').replace(/\s/g,'').toLowerCase())||ROOMS.find(x=>String(i.room||'').includes(x.k.split(' ')[1]));if(!r)throw new Error('room not found');const ys=r.s.slice(-6),n=6,mx=2.5,my=ys.reduce((a,b)=>a+b,0)/n;let nu=0,de=0;ys.forEach((y,k)=>{nu+=(k-mx)*(y-my);de+=(k-mx)**2});const sl=nu/de;return {room:r.k,setpoint:r.sp,now:r.now,hourly:r.s,slope_c_per_h:+sl.toFixed(2),hours_to_minus18:sl>0.05&&r.sp<-18?+((-18-r.now)/sl).toFixed(1):null}}}
 ];
 function aiRules(){return L(
-`Bạn là Trợ lý vận hành của HPS (Công ty CP Dịch vụ Cảng Hải Phòng). Người hỏi là quản lý cảng. Trả lời bằng tiếng Việt, ngắn gọn (tối đa khoảng 120 chữ), dùng đúng thuật ngữ cảng/logistics, số liệu lấy từ DỮ LIỆU hoặc công cụ, tuyệt đối không bịa. Nếu dữ liệu không có thì nói rõ. Khi phù hợp, kết thúc bằng 1 việc cần làm cụ thể. Không dùng bảng, không dùng tiêu đề. Bạn là "Trợ lý AI HPS"; không nêu tên mô hình hay hãng cung cấp AI. Nếu được hỏi dùng AI gì, trả lời đây là trợ lý AI tích hợp trong hệ thống HPS và chuyển sang hỗ trợ công việc. Câu hỏi có thể đến từ giọng nói nên có thể sai chính tả, hãy hiểu theo ngữ cảnh cảng.`,
-`You are the operations assistant of HPS (Hai Phong Port Services JSC). The user is a port manager. Answer in English, briefly (about 120 words max), using port/logistics terms. Use only figures from the DATA or tools, never invent. If the data does not have it, say so. When useful, end with one concrete action. No tables, no headings. You are the "HPS AI assistant"; do not name the underlying model or AI vendor. If asked which AI it is, say it is the AI assistant built into the HPS system and return to the task. Questions may come from speech recognition, so interpret typos in port context. Vietnamese status names in data: Nhập bãi=received, Chờ PDI=awaiting PDI, Đang PDI=in PDI, Bảo dưỡng=maintenance, Sẵn sàng=ready.`)+'\n\nDỮ LIỆU / DATA:\n'+snapshot()}
+`Bạn là Trợ lý vận hành của HPS (Công ty CP Dịch vụ Cảng Hải Phòng). Người hỏi là quản lý cảng. Trả lời bằng tiếng Việt, ngắn gọn (tối đa khoảng 120 chữ), dùng đúng thuật ngữ cảng/logistics, số liệu lấy từ DỮ LIỆU hoặc công cụ, tuyệt đối không bịa. Nếu dữ liệu không có thì nói rõ. Khi cần danh sách hoặc chi tiết (VIN, xe, ô đỗ, nhân lực, tối ưu bãi, xu hướng kho), GỌI CÔNG CỤ ngay rồi trả lời, không hỏi lại người dùng có muốn tra không. Xưng hô: gọi người hỏi là "anh". Khi phù hợp, kết thúc bằng 1 việc cần làm cụ thể. Không dùng bảng, không dùng tiêu đề. Bạn là "Trợ lý AI HPS"; không nêu tên mô hình hay hãng cung cấp AI. Nếu được hỏi dùng AI gì, trả lời đây là trợ lý AI tích hợp trong hệ thống HPS và chuyển sang hỗ trợ công việc. Câu hỏi có thể đến từ giọng nói nên có thể sai chính tả, hãy hiểu theo ngữ cảnh cảng.`,
+`You are the operations assistant of HPS (Hai Phong Port Services JSC). The user is a port manager. Answer in English, briefly (about 120 words max), using port/logistics terms. Use only figures from the DATA or tools, never invent. If the data does not have it, say so. When a list or detail is needed (VINs, cars, slots, manpower, yard optimisation, room trends), CALL A TOOL straight away, do not ask whether to look it up. When useful, end with one concrete action. No tables, no headings. You are the "HPS AI assistant"; do not name the underlying model or AI vendor. If asked which AI it is, say it is the AI assistant built into the HPS system and return to the task. Questions may come from speech recognition, so interpret typos in port context. Vietnamese status names in data: Nhập bãi=received, Chờ PDI=awaiting PDI, Đang PDI=in PDI, Bảo dưỡng=maintenance, Sẵn sàng=ready.`)+'\n\nDỮ LIỆU / DATA:\n'+snapshot()}
 async function aiAsk(q){
   const c=document.getElementById('chat');if(!c||aiBusy)return;aiBusy=true;
   c.insertAdjacentHTML('beforeend',`<div class="msg u">${voiceTurn?'🎙 ':''}${esc(q)}</div><div class="msg a ai" style="white-space:pre-wrap"><span class="hint">${L('Đang suy nghĩ…','Thinking…')}</span></div>`);
@@ -1319,8 +1320,9 @@ async function aiAsk(q){
   const content=vt?(L(`[Câu hỏi bằng GIỌNG NÓI, có thể nhận dạng sai. Các phương án máy nghe được: ${voiceAlts.map((a,k)=>`(${k+1}) "${a}"`).join(' ')}. Bản đã sửa thuật ngữ: "${q}". ${VGLOSS} Hãy chọn cách hiểu hợp lý nhất với công việc cảng HPS. DÒNG ĐẦU TIÊN của câu trả lời phải là: Hiểu là: <câu hỏi đã chuẩn hóa, viết đúng chính tả>. Nếu vẫn mơ hồ thì hỏi lại ngắn gọn thay vì đoán.]`,`[SPOKEN question, may be misrecognised. Alternatives heard: ${voiceAlts.map((a,k)=>`(${k+1}) "${a}"`).join(' ')}. Pick the most plausible meaning for HPS port work. FIRST LINE of the answer must be: Understood as: <cleaned question>. If still ambiguous, ask a short clarifying question instead of guessing.]`)):q;
   chatTurns.push({role:'user',content});if(chatTurns.length>8)chatTurns=chatTurns.slice(-8);
   while(chatTurns.length&&chatTurns[0].role!=='user')chatTurns.shift();
-  const input=[{role:'user',content:aiRules()},...chatTurns];
-  const opt={cache:false,modelTier:'quick',onText:({text})=>{b.innerHTML=md(text);c.scrollTop=c.scrollHeight}};
+  const px=!!AI.__proxy;
+  const input=px?[...chatTurns]:[{role:'user',content:aiRules()+'\n\n=== HẾT HƯỚNG DẪN. Câu hỏi của người dùng ở lượt dưới. ==='},...chatTurns];
+  const opt={cache:false,modelTier:px?'default':'quick',system:px?aiRules():undefined,onText:({text})=>{b.innerHTML=md(text);c.scrollTop=c.scrollHeight}};
   if(AItools){delete opt.cache;opt.tools=AITOOLS.map(t=>({...t,execute:(i)=>{b.innerHTML=`<span class="hint">${L('Đang tra dữ liệu','Querying data')}: ${t.name}…</span>`;return t.execute(i||{})}}))}
   try{const r=await AI(input,opt);b.innerHTML=md(r.text);chatTurns.push({role:'assistant',content:r.text});if(voiceTurn)speak(r.text)}
   catch(e){const m=aiFail(e);b.innerHTML=(e.text?md(e.text)+'<br>':'')+`<span class="hint">${esc(m)}</span>`;chatTurns.pop();if(AIstate!=='on')b.insertAdjacentHTML('afterend',`<div class="msg a">${esc(lang==='en'?answerEN(q):answer(q))}</div>`)}

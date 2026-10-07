@@ -1,11 +1,11 @@
-[desktop] state=on badge="Trợ lý AI HPS" mic=flex t=4.4s
-  A: Xếp lại bãi tiết kiệm được khoảng 3,9% quãng đường. Quãng đường xe chạy trong 7 ngày tới giảm từ 100,08 km xuống 96,15 km, và thời gian từ 30,8 giờ xuống 29,6 giờ. Tính theo năm là khoảng 493 giờ, tương đương 34 triệu đồng. Cần di chuyển 33 xe. Mức tiết kiệm không lớn, nên anh có thể xếp việc dời 33 xe vào lúc ít tàu hoặc ít việc.🔊 Nghe
+[mic test 1] AIstate=on micMode=az
+  STT 200 {"ok":true,"chu":"Kho 8 đang thế nào?","giay":2.8}
+  hint: Đã nghe: “Kho 8 đang thế nào?”
+  TTS 200
+  chat: 🎙 Kho 8 đang thế nào?  >>  🎧 Hiểu là: Kho 8 đang thế nào? | Kho 8 đang cảnh báo nghiêm trọng. Nhiệt độ hiện -20.2°C, cài -24°C nên lệch +3.8°C. Nhiệt độ tăng khoảng 0.64°C/giờ, dự báo chạm -18°C sau khoảng 3.4 giờ. Mr Cường đã được báo cấp 1. Nghi đóng băng dàn lạnh hoặc cửa cuốn mở nhiều. | Việc cần làm: anh cho kiểm tra dàn lạnh và cửa cuốn ngay. Đồng thời chuẩn bị phương án chuyển hàng sang kho khác nếu nhiệt độ không giảm trong 1–2 giờ tới.🔊 Nghe
   errs=[]
-
-[iPhone] state=on badge="Trợ lý AI HPS" mic=flex t=8.6s
-  A: Xếp lại bãi tiết kiệm được khoảng 3,9% quãng đường. Quãng đường 7 ngày tới giảm từ 100,08 km xuống 96,15 km, và thời gian chạy giảm từ 30,8 giờ xuống 29,6 giờ. Cả năm tiết kiệm khoảng 493 giờ, tương đương 34 triệu đồng. Cần đảo 33 xe. Mức này khá khiêm tốn. Anh nên cân nhắc chi phí nhân công đảo 33 xe trước khi duyệt.🔊 Nghe
-  errs=[]
-
-[Zalo-Android] state=on badge="Trợ lý AI HPS" mic=flex t=3.9s
-  A: Xếp lại bãi tiết kiệm được khoảng 3,9% quãng đường. Quãng đường 7 ngày tới giảm từ 100,08 km xuống 96,15 km, và thời gian giảm từ 30,8 giờ xuống 29,6 giờ. Cả năm tiết kiệm khoảng 493 giờ, tương đương 34 triệu đồng. Phải di chuyển 33 xe. Mức tiết kiệm khá khiêm tốn, nên anh có thể chọn thời điểm ít tàu để chuyển 33 xe này.🔊 Nghe
+[mic test 2] AIstate=on micMode=az
+  STT 200 {"ok":true,"chu":"Xếp lại bãi tiết kiệm được bao nhiêu?","giay":3.6}
+  hint: Đã nghe: “Xếp lại bãi tiết kiệm được bao nhiêu?”
+  chat: 🎙 Xếp lại bãi tiết kiệm được bao nhiêu?  >>  🎧 Hiểu là: Xếp lại bãi tiết kiệm được bao nhiêu? | Xếp lại bãi giúp giảm quãng đường 7 ngày tới từ 100,08 km xuống 96,15 km (3,9%). Thời gian giảm từ 30,8 giờ xuống 29,6 giờ, cần dời 33 xe. Mỗi năm tiết kiệm khoảng 493 giờ, tương đương 34 triệu đồng. | Đòn bẩy lớn hơn là điều xe đưa đón và xếp ô trước khi dỡ tàu RoRo. Mô phỏng cho thấy giải phóng tàu nhanh hơn khoảng 27%, tiết kiệm khoảng 25 triệu đồng mỗi tàu, tức khoảng 1,5 tỷ đồng mỗi năm. Anh nên lên phương án xếp ô cho tàu Pacific Bloom V.2610, ETA 03/10.🔊 Nghe
   errs=[]

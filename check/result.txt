@@ -1,7 +1,7 @@
 == AZURE
-ping 200 0.296390s
-{"enabled": true, "model": "claude-opus-4-8", "effort": "medium", "today": "", "phucVuAi": {"vietCoMa": 0, "vietVoDanh": 0, "pvCoMa": 0, "pvVoDanh": 0, "ghiOK": 0, "ghiHong": 0, "pvChan": 0}, "usedToday": 0, "dailyMax": 600, "ipHourly": 40, "maxChars": 4000, "totalCalls": 0, "phatAm": {"enabled": true, "region": "southeastasia", "today": "2026-10-07", "usedToday": 1, "dailyMax": 800, "ipHourly": 60, "maxKB": 1200, "totalCalls": 1, "totalAudioSec": 5.5}}
-doc-cau 200 1.670570s 44421B
+ping 200 0.217990s
+{"enabled": true, "model": "claude-opus-4-8", "effort": "medium", "today": "", "phucVuAi": {"vietCoMa": 0, "vietVoDanh": 0, "pvCoMa": 0, "pvVoDanh": 0, "ghiOK": 0, "ghiHong": 0, "pvChan": 0}, "usedToday": 0, "dailyMax": 600, "ipHourly": 40, "maxChars": 4000, "totalCalls": 0, "phatAm": {"enabled": true, "region": "southeastasia", "today": "2026-10-07", "usedToday": 2, "dailyMax": 800, "ipHourly": 60, "maxKB": 1200, "totalCalls": 2, "totalAudioSec": 11.1}}
+doc-cau 200 1.136855s 44421B
 ok True vi-VN-HoaiMyNeural None
 access-control-allow-headers: Content-Type
 access-control-allow-methods: GET, POST, OPTIONS
@@ -18,7 +18,7 @@ HTTP 200
 302  https://main.cic-survey.pages.dev/bizdata.js
 302  https://cic-survey.pages.dev/api/hps-ai2
 == AI QUICK
-{"type":"message","role":"assistant","content":[{"type":"text","text":"Cảng RoRo Tân Vũ ở thành phố **Hải Phòng**."}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null}
+{"type":"message","role":"assistant","content":[{"type":"text","text":"Cảng RoRo Tân Vũ ở thành phố **Hải Phòng**, Việt Nam."}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null}
 HTTP 200
 == AI DEFAULT
 {"type":"message","role":"assistant","content":[{"type":"text","text":"OK"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null}
@@ -28,12 +28,12 @@ HTTP 200
 HTTP 403
 == PREFLIGHT
 HTTP/2 204 
-date: Wed, 07 Oct 2026 10:40:28 GMT
+date: Wed, 07 Oct 2026 10:54:27 GMT
 access-control-allow-origin: https://nguyenhongphong1973-dot.github.io
 vary: Origin
 access-control-allow-headers: content-type
 access-control-allow-methods: GET, POST, OPTIONS
 access-control-max-age: 86400
-report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=1msYPaOmkwiIeov9Xj%2FQINaaIVnqRXpDFZAwdvWIzukjTy7%2FLCAe8FZVENubtZ2dDyUZfYumFULQgj6cO%2FZF8wNax1IyRHsHzxzL7PR7x93O2WbQoO%2BVYC9rFYutLu3d0nFXIUWOww%3D%3D"}]}
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=WjvEeaBDtjmgKfVFFU%2B4e8Ct46kubUptV2uO28qkCDUzcibOELxAMSyj1w0JMlLkfRHJB7bePRiYsUdmXTVY3nWiL%2Bx2ZJxGd7VIj4CA9NFssd8RkgfJk0AXO0jYd0vkMx4TWgmTFA%3D%3D"}]}
 nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
 server: cloudflare

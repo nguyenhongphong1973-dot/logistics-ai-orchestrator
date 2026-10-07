@@ -1105,7 +1105,7 @@ const fmt1=n=>(Math.round(n*10)/10).toLocaleString(lang==='en'?'en-US':'vi-VN');
 const fmt0=n=>Math.round(n).toLocaleString(lang==='en'?'en-US':'vi-VN');
 
 /* ---- AI outside Claude: same interface as claude.use('sample'), via the HPS proxy (Cloudflare Worker) ---- */
-const AI_PROXY_DEFAULT='';
+const AI_PROXY_DEFAULT='https://cic-survey.pages.dev/api/hps-ai';
 const AI_PROXY=(()=>{try{const u=new URLSearchParams(location.search).get('ai');if(u&&/^https:\/\//.test(u)){localStorage.setItem('hpsai',u);return u}return localStorage.getItem('hpsai')||AI_PROXY_DEFAULT}catch(e){return AI_PROXY_DEFAULT}})();
 function proxySample(url){
   const call=async body=>{let r;try{r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})}catch(e){throw {code:'upstream_error',message:String(e)}}
@@ -1143,7 +1143,7 @@ function aiFlags(){const b=document.body;if(!b)return;b.classList.toggle('aion',
 (async()=>{try{
   let s=null;
   if(typeof claude!=='undefined'&&claude&&claude.use){try{s=await claude.use('sample')}catch(e){s=null}}
-  if(!s&&AI_PROXY)s=proxySample(AI_PROXY);
+  if(!s&&AI_PROXY&&/^https?:/.test(location.protocol)){try{const r=await fetch(AI_PROXY,{method:'GET',cache:'no-store'});const j=await r.json();if(j&&j.ok)s=proxySample(AI_PROXY)}catch(e){}}
   if(!s){AIstate='off';aiFlags();return}
   AI=s;AIstate='on';
   try{const l=await s.limits();AIimg=!!(l&&l.images);AItools=!!(l&&l.tools)}catch(e){}

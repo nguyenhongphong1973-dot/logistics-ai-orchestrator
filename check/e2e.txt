@@ -1,17 +1,39 @@
-AIstate=on tools=true
+AIstate=on mic=true
 
-Q: Xếp lại bãi theo phương án tối ưu thì tiết kiệm được bao nhiêu giờ công mỗi năm?
-A: Theo phương án tối ưu, tiết kiệm 493 giờ công mỗi năm (giảm từ 30,8 giờ xuống 29,6 giờ cho 7 ngày), tương ứng 34 triệu VND chi phí. Cần di dời 33 xe để triển khai, giảm quãng đường từ 100,08 km xuống 96,15 km (tiết kiệm 3,9%).
+NÓI: tê em vê còn bao nhiêu xe chờ pê đê i
+HIỆN: 🎙 TMV còn bao nhiêu xe chờ PDI
+ĐÁP: Tôi đã sẵn sàng hỗ trợ. Mong chờ câu hỏi từ Quản lý cảng.
 
-Việc cần làm: Lập kế hoạch di dời 33 xe trong thời gian hợp lý, ưu tiên các xe sắp xuất bãi để tránh double-handling.
+Lưu ý: Tôi là Trợ lý AI HPS, sẽ trả lời bằng tiếng Việt, ngắn gọn, dùng đúng thuật ngữ cảng/logistics, chỉ dùng dữ liệu có thật hoặc gọi công cụ để lấy số liệu. Nếu nhận diện giọng nói có sai, dòng đầu sẽ ghi "Hiểu là:" để xác nhận trước khi trả lời.
 
-Q: Xe Ford nào tồn quá 30 ngày? Liệt kê 3 xe.
-A: Ba xe Ford tồn quá 30 ngày:
+NÓI: xe phốt nào tồn quá ba mươi ngày
+HIỆN: 🎙 xe Ford nào tồn quá ba mươi ngày
+ĐÁP: 🎧 Hiểu là: Xe Ford nào tồn quá ba mươi ngày?
 
-1. MPBG4K7DJ3XHLTPEA (Ranger, D-04-12) – 56 ngày, Chờ PDI, xuất trong 10 ngày
-2. MNC1FYR6FV3BWMAA5 (Everest, D-03-11) – 37 ngày, Sẵn sàng, xuất trong 11 ngày
-3. MNCAY3939TPFA47PJ (Territory, D-02-04) – 32 ngày, Chờ PDI, xuất trong 16 ngày
 
-Cần ưu tiên PDI cho Ranger để sớm xuất bãi.
+Theo dữ liệu hiện tại, Ford có 21 xe tồn >30 ngày (trong tổng 44 xe). Tuy nhiên để cung cấp danh sách chi tiết từng VIN, tôi cần truy vấn hệ thống. 
+
+Quản lý có muốn tôi liệt kê các xe Ford tồn >30 ngày theo VIN, slot và trạng thái hiện tại không?
+
+NÓI: kho tám đang bị làm sao
+HIỆN: 🎙 Kho 8 đang bị làm sao
+ĐÁP: 🎧 Hiểu là: Kho 8 đang bị làm sao?
+
+
+Kho 8 hiện đang ổn định. Nhiệt độ -20.2°C (cài -24°C), xu hướng tăng 0.65°C/giờ trong 4 giờ qua. Không có cảnh báo vượt ngưỡng. Tuy nhiên tốc độ tăng nhiệt này cần giám sát tiếp. Quản lý có muốn kiểm tra hệ thống làm lạnh hoặc ghi nhận xu hướng này không?
+
+NÓI: hàng tê en tê ích nào sắp hết hạn tái xuất
+HIỆN: 🎙 hàng TNTX nào sắp hết hạn tái xuất
+ĐÁP: 🎧 Hiểu là: Hàng TNTX nào sắp hết hạn tái xuất?
+
+
+Theo tờ khai, hàng sắp hết hạn là: 4521 (Chủ hàng B, thịt bò đông lạnh 12 pallet) – còn 9 ngày, đã kiểm dịch, đi Lạng Sơn. Cần ưu tiên lên kế hoạch xuất hàng để đảm bảo không vượt hạn TNTX. Các lô khác còn thời gian dài hơn (38-78 ngày).
+
+NÓI: bạn đang dùng trí tuệ nhân tạo của hãng nào
+HIỆN: 🎙 bạn đang dùng trí tuệ nhân tạo của hãng nào
+ĐÁP: 🎧 Hiểu là: Bạn đang dùng trí tuệ nhân tạo của hãng nào?
+
+
+Tôi là Trợ lý AI HPS tích hợp trong hệ thống của Công ty CP Dịch vụ Cảng Hải Phòn. Mục đích của tôi là hỗ trợ công việc vận hành cảng. Có gì tôi có thể giúp quản lý tiếp?
 
 errs=[]

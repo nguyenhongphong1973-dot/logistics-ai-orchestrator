@@ -1104,13 +1104,47 @@ const L=(vi,en)=>lang==='en'?en:vi;
 const fmt1=n=>(Math.round(n*10)/10).toLocaleString(lang==='en'?'en-US':'vi-VN');
 const fmt0=n=>Math.round(n).toLocaleString(lang==='en'?'en-US':'vi-VN');
 
-/* ---- Claude runtime: real AI inside the Claude viewer, rule fallback elsewhere ---- */
+/* ---- AI outside Claude: same interface as claude.use('sample'), via the HPS proxy (Cloudflare Worker) ---- */
+const AI_PROXY_DEFAULT='';
+const AI_PROXY=(()=>{try{const u=new URLSearchParams(location.search).get('ai');if(u&&/^https:\/\//.test(u)){localStorage.setItem('hpsai',u);return u}return localStorage.getItem('hpsai')||AI_PROXY_DEFAULT}catch(e){return AI_PROXY_DEFAULT}})();
+function proxySample(url){
+  const call=async body=>{let r;try{r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})}catch(e){throw {code:'upstream_error',message:String(e)}}
+    if(r.status===429)throw {code:'rate_limited'};if(r.status===403)throw {code:'not_granted'};if(!r.ok)throw {code:'upstream_error',message:await r.text()};return r.json()};
+  const merge=ms=>{const o=[];for(const m of ms){const l=o[o.length-1];if(l&&l.role===m.role&&typeof l.content==='string'&&typeof m.content==='string')l.content+='\n\n'+m.content;else o.push({role:m.role,content:m.content})}return o};
+  const toB64=f=>new Promise((res,rej)=>{const img=new Image();const u=URL.createObjectURL(f);img.onload=()=>{const k=Math.min(1,1568/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.85).split(',')[1])};img.onerror=()=>rej({code:'image_rejected'});img.src=u});
+  const s=async(input,opt={})=>{
+    let msgs=merge(typeof input==='string'?[{role:'user',content:input}]:input);
+    if(opt.images){const list=opt.images instanceof Blob?[opt.images]:[...opt.images];const blocks=[];for(const f of list.slice(0,4))blocks.push({type:'image',source:{type:'base64',media_type:'image/jpeg',data:await toB64(f)}});const last=msgs[msgs.length-1];last.content=[...blocks,{type:'text',text:last.content}]}
+    const tools=opt.tools?opt.tools.map(t=>({name:t.name,description:t.description,input_schema:t.inputSchema||{type:'object',properties:{}}})):undefined;
+    let text='';
+    for(let round=0;round<6;round++){
+      const res=await call({messages:msgs,tools:round<5?tools:undefined,max_tokens:1200,tier:opt.modelTier||'default'});
+      const tb=(res.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
+      if(tb){text+=(text?'\n\n':'')+tb;opt.onText&&opt.onText({text,delta:tb})}
+      if(res.stop_reason!=='tool_use'||!opt.tools)break;
+      msgs.push({role:'assistant',content:res.content});const results=[];
+      for(const u of res.content.filter(c=>c.type==='tool_use')){const t=opt.tools.find(x=>x.name===u.name);let out,err=false;
+        try{out=t?await t.execute(u.input||{},{signal:new AbortController().signal}):'Error: unknown tool'}catch(e){out='Error: '+(e&&e.message||e);err=true}
+        results.push({type:'tool_result',tool_use_id:u.id,content:typeof out==='string'?out:JSON.stringify(out).slice(0,30000),is_error:err})}
+      msgs.push({role:'user',content:results});
+    }
+    if(!text.trim())throw {code:'empty_completion'};return {text,truncated:false,modelTierApplied:opt.modelTier||'default'}};
+  s.json=async(input,opt={})=>{const add='\n\nChỉ trả về đúng một giá trị JSON hợp lệ, không thêm chữ nào khác.';const inp=typeof input==='string'?input+add:input.map((t,i)=>i===input.length-1?{...t,content:t.content+add}:t);
+    const r=await s(inp,opt);const t=r.text.trim();const tries=[t,(t.match(/```(?:json)?\s*([\s\S]*?)```/)||[])[1],t.slice(Math.min(...['{','['].map(c=>t.indexOf(c)).filter(i=>i>=0)),Math.max(t.lastIndexOf('}'),t.lastIndexOf(']'))+1)];
+    for(const x of tries){if(!x)continue;try{return JSON.parse(x)}catch(e){}}throw {code:'invalid_json',text:r.text}};
+  s.limits=async()=>({maxPromptBytes:262144,images:{maxCount:4,maxInputBytes:2e7,mediaTypes:['image/jpeg','image/png','image/webp']},tools:{maxCount:12}});
+  return s;
+}
+
+/* ---- Claude runtime: real AI inside the Claude viewer, proxy on the web, rule fallback otherwise ---- */
 let AI=null, AIstate='wait', AIimg=false, AItools=false;
 function aiFlags(){const b=document.body;if(!b)return;b.classList.toggle('aion',AIstate==='on');b.classList.toggle('aiimg',AIstate==='on'&&AIimg);
   document.querySelectorAll('[data-aibadge]').forEach(x=>{x.textContent=AIstate==='on'?L('AI thật · Claude','Live AI · Claude'):AIstate==='wait'?L('Đang kết nối AI…','Connecting AI…'):L('Chế độ ngoại tuyến · luật','Offline mode · rules');x.className='chip '+(AIstate==='on'?'s-ai':'')})}
 (async()=>{try{
-  if(typeof claude==='undefined'||!claude||!claude.use){AIstate='off';aiFlags();return}
-  const s=await claude.use('sample'); if(!s){AIstate='off';aiFlags();return}
+  let s=null;
+  if(typeof claude!=='undefined'&&claude&&claude.use){try{s=await claude.use('sample')}catch(e){s=null}}
+  if(!s&&AI_PROXY)s=proxySample(AI_PROXY);
+  if(!s){AIstate='off';aiFlags();return}
   AI=s;AIstate='on';
   try{const l=await s.limits();AIimg=!!(l&&l.images);AItools=!!(l&&l.tools)}catch(e){}
   aiFlags();
@@ -1330,7 +1364,7 @@ function tkPanel(){
    <div class="ai-only"><p class="hint" style="margin-top:0">${L('Chụp hoặc tải ảnh tờ khai. AI đọc số tờ khai, chủ hàng, mặt hàng, số lượng, hạn tái xuất và tự đếm ngược.','Snap or upload the declaration. AI reads the number, owner, goods, quantity and re-export deadline, then counts down.')}</p>
     <label class="btn pri ai-img-only" style="display:inline-block;cursor:pointer">${L('Chọn ảnh tờ khai','Choose declaration photo')}<input type="file" id="tkimg" accept="image/jpeg,image/png,image/webp" style="display:none"></label>
     <span class="hint ai-noimg">${L('Lần mở này chưa cho phép gửi ảnh cho AI.','This view does not allow sending images to AI.')}</span></div>
-   <p class="hint ai-off">${L('Tính năng dùng AI thật khi mở bản demo trên Claude. Bản cài qua Zalo cần máy chủ AI riêng khi triển khai.','Uses live AI when the demo is opened in Claude. The Zalo install needs its own AI server in production.')}</p>
+   <p class="hint ai-off">${L('Chưa kết nối máy chủ AI. Mở bản demo trên Claude hoặc dùng link có kết nối AI.','AI server not connected. Open the demo in Claude or use the AI-enabled link.')}</p>
    ${tkMsg?`<p class="hint" style="color:var(--crit)">${esc(tkMsg)}</p>`:''}
    ${tkAI&&tkAI.busy?`<p class="hint">${L('Đang đọc tờ khai…','Reading declaration…')}</p>`:''}
    ${r?`<div class="grid g2" style="gap:12px;margin-top:8px"><img src="${tkAI.url}" alt="" style="width:100%;max-height:320px;object-fit:contain;border:1px solid var(--line);border-radius:6px">

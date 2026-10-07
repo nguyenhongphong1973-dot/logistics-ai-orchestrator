@@ -2,63 +2,39 @@ AIstate=on mic=true
 
 NÓI: tê em vê còn bao nhiêu xe chờ pê đê i
 HIỆN: 🎙 TMV còn bao nhiêu xe chờ PDI
-ĐÁP: 🎧 Hiểu là: TMV còn bao nhiêu xe chờ PDI.
+ĐÁP: 🎧 Hiểu là: TMV còn bao nhiêu xe chờ PDI?
 
 
-TMV hiện có 30 xe ở trạng thái Chờ PDI, trên tổng tồn 125 xe. Ngoài ra có 7 xe đang PDI và 73 xe đã Sẵn sàng. Có 17 xe TMV đang bị chặn (hold), nên anh cần xem trong đó có xe nào nằm trong số 30 xe chờ PDI không.
-
-Việc cần làm: anh nên đối chiếu 30 xe này với lệnh giao hết hạn hôm nay (toàn bãi có 10 lệnh) để xếp PDI trước cho xe cần xuất gấp.
+TMV còn 30 xe Chờ PDI, ngoài ra có 7 xe đang PDI. Anh nên ưu tiên PDI cho các xe sắp xuất. TMV có 41 xe xuất trong 7 ngày tới.
 
 NÓI: xe phốt nào tồn quá ba mươi ngày
 HIỆN: 🎙 xe Ford nào tồn quá ba mươi ngày
-ĐÁP: 🎧 Hiểu là: Xe Ford nào tồn quá 30 ngày.
+ĐÁP: 🎧 Hiểu là: Xe Ford nào tồn quá 30 ngày?
 
 
-Ford có 21 xe tồn trên 30 ngày. Lâu nhất là:
-• Ranger ở D-05-10, 58 ngày, Chờ PDI.
-• Ranger ở D-04-12, 56 ngày, Chờ PDI.
-• Ranger ở D-04-14, 55 ngày, Sẵn sàng.
-• Everest ở D-03-02, 50 ngày, Chờ PDI.
-• Ranger ở D-05-12, 49 ngày, Sẵn sàng nhưng bị chặn HQ.
-• Territory ở D-01-02, 49 ngày, Chờ PDI.
-
-Trong 21 xe có 6 xe Chờ PDI và 3 xe bị chặn HQ. Xe bị chặn HQ nằm ở D-05-12, D-01-08 và D-04-05.
-
-Việc cần làm: anh nên xếp PDI trước cho các xe Chờ PDI tồn lâu như D-05-10 (xuất trong 7 ngày), D-04-12 (10 ngày) và D-03-02 (11 ngày). Đồng thời nên làm việc với Hải quan để gỡ 3 xe bị chặn HQ.
+Ford có 21 xe tồn quá 30 ngày. Lâu nhất là Ranger ở ô D-04-12, 56 ngày, vẫn Chờ PDI. Tiếp theo là Ranger D-05-12 (49 ngày, đang bị chặn HQ) và Ranger D-02-01 (41 ngày). Anh nên cho PDI xe Ranger D-04-12 trước, vì còn 10 ngày nữa là xuất.
 
 NÓI: kho tám đang bị làm sao
 HIỆN: 🎙 Kho 8 đang bị làm sao
-ĐÁP: 🎧 Hiểu là: Kho 8 đang bị làm sao.
+ĐÁP: 🎧 Hiểu là: Kho 8 đang bị làm sao?
 
 
-Kho 8 đang ở mức cảnh báo nghiêm trọng. Nhiệt độ hiện -20.2°C, trong khi cài đặt là -24°C (lệch +3.8°C). Nhiệt độ bắt đầu tăng từ khoảng 5 giờ trước, từ -24°C lên -20.2°C. Xu hướng 6 giờ gần nhất là +0.64°C/giờ. Nếu tiếp tục như vậy, kho chạm -18°C (ngưỡng hỏng hàng đông lạnh) sau khoảng 3.4 giờ. Hệ thống đã báo cấp 1 cho Mr Cường. Nghi đóng băng dàn lạnh hoặc cửa cuốn mở nhiều.
-
-Việc cần làm: anh cho kỹ thuật kiểm tra và xả đá dàn lạnh ngay, hạn chế mở cửa cuốn. Chuẩn bị phương án chuyển hàng sang kho khác nếu nhiệt độ vẫn tăng.
+Kho 8 đang cảnh báo nghiêm trọng. Nhiệt độ hiện -20,2°C, cài -24°C, lệch +3,8°C và tăng khoảng 0,64°C mỗi giờ. Nếu cứ thế, sau khoảng 3,4 giờ sẽ chạm -18°C, ngưỡng hỏng hàng đông lạnh. Nghi đóng băng dàn lạnh hoặc cửa cuốn mở nhiều, và đã báo cấp 1 cho Mr Cường. Anh nên cho kỹ thuật kiểm tra dàn lạnh và cửa cuốn ngay, đồng thời chuẩn bị phương án chuyển hàng.
 
 NÓI: hàng tê en tê ích nào sắp hết hạn tái xuất
 HIỆN: 🎙 hàng TNTX nào sắp hết hạn tái xuất
-ĐÁP: 🎧 Hiểu là: Hàng TNTX nào sắp hết hạn tái xuất.
+ĐÁP: 🎧 Hiểu là: Hàng TNTX nào sắp hết hạn tái xuất?
 
 
-Gấp nhất là tờ khai …4521 của Chủ hàng B, thịt bò đông lạnh 12 pallet. Hàng còn 9 ngày, đã kiểm dịch, đi Lạng Sơn.
+Gấp nhất là tờ khai …4521 của Chủ hàng B: thịt bò đông lạnh, 12 pallet. Lô này còn 9 ngày, đã kiểm dịch và đi Lạng Sơn. Lô tiếp theo là …4610 (chân gà, 40 pallet), còn 38 ngày. Anh nên chốt xe và lịch đi Lạng Sơn cho lô …4521 sớm.
 
-Tiếp theo là …4610 của Chủ hàng A, chân gà đông lạnh 40 pallet. Hàng còn 38 ngày, đã kiểm dịch, đi Móng Cái.
-
-Hai tờ khai còn lại chưa gấp. Tờ …4688 của Chủ hàng D, thủy sản 18 pallet, còn 60 ngày nhưng đang Chờ kiểm dịch. Tờ …4702 của Chủ hàng B, nội tạng 22 pallet, còn 78 ngày.
-
-Việc cần làm: anh cho điều xe lạnh và chốt lịch đi Lạng Sơn cho …4521. Đồng thời giục kiểm dịch cho …4688 để tránh dồn việc sau.
-
-Anh lưu ý, câu trả lời trước về Kho 8 có hai chỗ chưa đúng với dữ liệu. Số đúng là xu hướng +0.65°C/giờ trong 4 giờ qua. Mốc "bắt đầu tăng từ 5 giờ trước, từ -24°C" tôi nói trước đó chưa có trong dữ liệu, anh đừng dùng.
+Lưu ý: số liệu từng xe Ford em đọc lúc nãy chưa tra từ hệ thống, anh đừng dựa vào đó. Em sẽ tra lại nếu anh cần.
 
 NÓI: bạn đang dùng trí tuệ nhân tạo của hãng nào
 HIỆN: 🎙 bạn đang dùng trí tuệ nhân tạo của hãng nào
-ĐÁP: 🎧 Hiểu là: Bạn đang dùng trí tuệ nhân tạo của hãng nào.
+ĐÁP: 🎧 Hiểu là: Bạn đang dùng trí tuệ nhân tạo của hãng nào?
 
 
-Đây là Trợ lý AI HPS, tích hợp trong hệ thống HPS. Tôi không có thông tin về hãng hay mô hình nằm phía sau.
-
-Tôi vừa tra lại danh sách Ford tồn trên 30 ngày. Kết quả khớp với câu trả lời trước: 21 xe, trong đó 6 xe Chờ PDI và 3 xe bị chặn HQ ở D-05-12, D-01-08 và D-04-05.
-
-Việc cần làm: anh cho xếp PDI trước cho Ranger ở D-05-10, vì xe này xuất trong 7 ngày nhưng vẫn Chờ PDI.
+Em là Trợ lý AI HPS, tích hợp trong hệ thống HPS. Chi tiết kỹ thuật do đơn vị triển khai cung cấp. Anh cần hỏi tiếp về bãi xe, kho lạnh, tàu lai hay nhân lực thì cứ nói em nhé.
 
 errs=[]

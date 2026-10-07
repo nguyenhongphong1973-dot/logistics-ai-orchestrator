@@ -8,7 +8,7 @@ HTTP 200
 302  https://main.cic-survey.pages.dev/bizdata.js
 302  https://cic-survey.pages.dev/api/hps-ai2
 == AI QUICK
-{"type":"message","role":"assistant","content":[{"type":"text","text":"Cảng RoRo Tân Vũ ở thành phố **Hải Phòng**, Việt Nam."}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null}
+{"type":"message","role":"assistant","content":[{"type":"text","text":"Cảng RoRo Tân Vũ ở thành phố **Hải Phòng**."}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null}
 HTTP 200
 == AI DEFAULT
 {"type":"message","role":"assistant","content":[{"type":"text","text":"OK"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null}
@@ -18,12 +18,12 @@ HTTP 200
 HTTP 403
 == PREFLIGHT
 HTTP/2 204 
-date: Wed, 07 Oct 2026 08:49:17 GMT
+date: Wed, 07 Oct 2026 08:54:18 GMT
 access-control-allow-origin: https://nguyenhongphong1973-dot.github.io
 vary: Origin
 access-control-allow-headers: content-type
 access-control-allow-methods: GET, POST, OPTIONS
 access-control-max-age: 86400
-report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=UdVBY2v2TXk57IsusZ4u0U1tTTw%2BEoIPiN1qa6D2Gi72XvOBM8mM5Tb2nS3nAEWMpQPCC8A%2FfC836zoN067053REmJf6qFxErxn5UW2L6TdkxJFM%2BKpRq5d8oMKyuvu1t9nlVhWttw%3D%3D"}]}
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=GPpA%2BcDHPOEVCku9jjDx0hFhwycLovMhCMfEdVu626AcCBKAdJe0GLEGOsB%2FOUl3Cj%2Ft2zCDHyX%2BqJ56my5NIH4aOUs9OAzOlPJJ1mdSnC0cXQTDIa%2F9Lzq%2FnBC0Hl73HoJqw8hFrg%3D%3D"}]}
 nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
 server: cloudflare

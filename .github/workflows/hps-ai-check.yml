@@ -20,6 +20,10 @@ jobs:
           curl -s -m 90 -X POST https://vicmac-proxy.onrender.com/ai-doc-cau -H "Origin: https://nguyenhongphong1973-dot.github.io" -H "content-type: application/json" -d '{"chu":"Kho 8 đang cảnh báo nghiêm trọng, khoảng 3,4 giờ nữa chạm âm 18 độ.","giong":"viet"}' -o check/az.json -D check/az.hdr -w "doc-cau %{http_code} %{time_total}s %{size_download}B\n" >> $R
           python3 -c "import json,base64;d=json.load(open('check/az.json'));print('ok',d.get('ok'),d.get('giong'),d.get('error'));open('check/az.mp3','wb').write(base64.b64decode(d['mp3'])) if d.get('mp3') else None" >> $R 2>&1
           grep -i "access-control" check/az.hdr >> $R; rm -f check/az.json check/az.hdr
+          echo "== AZURE STT vi-VN (đọc lại file giọng Hoài My)" >> $R
+          sudo apt-get install -y -qq ffmpeg >/dev/null 2>&1; ffmpeg -loglevel error -y -i check/az.mp3 -ar 16000 -ac 1 -sample_fmt s16 /tmp/a.wav
+          python3 -c "import base64,json;print(json.dumps({'wavBase64':base64.b64encode(open('/tmp/a.wav','rb').read()).decode(),'lang':'vi-VN'}))" > /tmp/b.json
+          curl -s -m 90 -X POST https://vicmac-proxy.onrender.com/ai-nghe-noi -H "content-type: application/json" --data @/tmp/b.json | head -c 400 >> $R; echo >> $R
           echo "== HEALTH" >> $R; curl -s -w "\nHTTP %{http_code}\n" "$E" >> $R
           echo "== CIC LOCKED (expect 302)" >> $R
           for u in https://cic-survey.pages.dev/bizdata.js https://cic-survey.pages.dev/ https://cic-survey.pages.dev/api/certs https://main.cic-survey.pages.dev/bizdata.js https://cic-survey.pages.dev/api/hps-ai2; do echo "$(curl -s -o /dev/null -w '%{http_code}' "$u")  $u" >> $R; done

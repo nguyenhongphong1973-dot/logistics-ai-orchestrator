@@ -1,21 +1,11 @@
-AIstate=on azure=function
+[desktop] state=on badge="Trợ lý AI HPS" mic=flex t=4.4s
+  A: Xếp lại bãi tiết kiệm được khoảng 3,9% quãng đường. Quãng đường xe chạy trong 7 ngày tới giảm từ 100,08 km xuống 96,15 km, và thời gian từ 30,8 giờ xuống 29,6 giờ. Tính theo năm là khoảng 493 giờ, tương đương 34 triệu đồng. Cần di chuyển 33 xe. Mức tiết kiệm không lớn, nên anh có thể xếp việc dời 33 xe vào lúc ít tàu hoặc ít việc.🔊 Nghe
+  errs=[]
 
-TTS 200 ok=true giong=vi-VN-HoaiMyNeural mp3KB=80
+[iPhone] state=on badge="Trợ lý AI HPS" mic=flex t=8.6s
+  A: Xếp lại bãi tiết kiệm được khoảng 3,9% quãng đường. Quãng đường 7 ngày tới giảm từ 100,08 km xuống 96,15 km, và thời gian chạy giảm từ 30,8 giờ xuống 29,6 giờ. Cả năm tiết kiệm khoảng 493 giờ, tương đương 34 triệu đồng. Cần đảo 33 xe. Mức này khá khiêm tốn. Anh nên cân nhắc chi phí nhân công đảo 33 xe trước khi duyệt.🔊 Nghe
+  errs=[]
 
-NÓI: tê em vê còn bao nhiêu xe chờ pê đê i
-ĐÁP: 🎧 Hiểu là: TMV còn bao nhiêu xe chờ PDI.
-
-
-TMV hiện có 30 xe đang Chờ PDI, ngoài ra có 7 xe Đang PDI. Hôm nay có 10 lệnh giao hết hạn. Anh nên cho đội PDI ưu tiên các xe thuộc những lệnh này trước.🔊 Nghe
-
-TTS 200 ok=true giong=vi-VN-HoaiMyNeural mp3KB=169
-
-NÓI: kho tám đang bị làm sao
-ĐÁP: 🎧 Hiểu là: Kho 8 đang bị làm sao.
-
-
-Kho 8 đang cảnh báo nghiêm trọng. Nhiệt độ hiện -20.2°C, cài -24°C, lệch +3.8°C và đang tăng khoảng 0,64°C/giờ. Nếu cứ thế, khoảng 3,4 giờ nữa sẽ chạm -18°C, ngưỡng hỏng hàng đông lạnh. Nghi đóng băng dàn lạnh hoặc cửa cuốn mở nhiều, và đã báo cấp 1 cho Mr Cường. Anh nên cho kỹ thuật kiểm tra dàn lạnh ngay, đồng thời hạn chế mở cửa kho.🔊 Nghe
-
-audio src set=true
-
-errs=[]
+[Zalo-Android] state=on badge="Trợ lý AI HPS" mic=flex t=3.9s
+  A: Xếp lại bãi tiết kiệm được khoảng 3,9% quãng đường. Quãng đường 7 ngày tới giảm từ 100,08 km xuống 96,15 km, và thời gian giảm từ 30,8 giờ xuống 29,6 giờ. Cả năm tiết kiệm khoảng 493 giờ, tương đương 34 triệu đồng. Phải di chuyển 33 xe. Mức tiết kiệm khá khiêm tốn, nên anh có thể chọn thời điểm ít tàu để chuyển 33 xe này.🔊 Nghe
+  errs=[]

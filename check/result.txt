@@ -1,7 +1,7 @@
 == AZURE
-ping 200 0.289870s
-{"enabled": true, "model": "claude-opus-4-8", "effort": "medium", "today": "", "phucVuAi": {"vietCoMa": 0, "vietVoDanh": 0, "pvCoMa": 0, "pvVoDanh": 0, "ghiOK": 0, "ghiHong": 0, "pvChan": 0}, "usedToday": 0, "dailyMax": 600, "ipHourly": 40, "maxChars": 4000, "totalCalls": 0, "phatAm": {"enabled": true, "region": "southeastasia", "today": "", "usedToday": 0, "dailyMax": 800, "ipHourly": 60, "maxKB": 1200, "totalCalls": 0, "totalAudioSec": 0.0}}
-doc-cau 200 1.240932s 44421B
+ping 200 0.296390s
+{"enabled": true, "model": "claude-opus-4-8", "effort": "medium", "today": "", "phucVuAi": {"vietCoMa": 0, "vietVoDanh": 0, "pvCoMa": 0, "pvVoDanh": 0, "ghiOK": 0, "ghiHong": 0, "pvChan": 0}, "usedToday": 0, "dailyMax": 600, "ipHourly": 40, "maxChars": 4000, "totalCalls": 0, "phatAm": {"enabled": true, "region": "southeastasia", "today": "2026-10-07", "usedToday": 1, "dailyMax": 800, "ipHourly": 60, "maxKB": 1200, "totalCalls": 1, "totalAudioSec": 5.5}}
+doc-cau 200 1.670570s 44421B
 ok True vi-VN-HoaiMyNeural None
 access-control-allow-headers: Content-Type
 access-control-allow-methods: GET, POST, OPTIONS
@@ -28,12 +28,12 @@ HTTP 200
 HTTP 403
 == PREFLIGHT
 HTTP/2 204 
-date: Wed, 07 Oct 2026 10:12:42 GMT
+date: Wed, 07 Oct 2026 10:40:28 GMT
 access-control-allow-origin: https://nguyenhongphong1973-dot.github.io
 vary: Origin
 access-control-allow-headers: content-type
 access-control-allow-methods: GET, POST, OPTIONS
 access-control-max-age: 86400
-report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=lCCKaj%2FXr7tnKXjbluN3%2FY%2BUlBtedD5mi8IajhHZTRstASldma1z5%2F3AJElcNZzMQ6WMdXHQ0W1eUYIjOar5J6kEpWxN5mlncqm%2FGOyGTmPZEPLYkERCJo1tzw8dqUjqoPNn4H%2BMKQ%3D%3D"}]}
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=1msYPaOmkwiIeov9Xj%2FQINaaIVnqRXpDFZAwdvWIzukjTy7%2FLCAe8FZVENubtZ2dDyUZfYumFULQgj6cO%2FZF8wNax1IyRHsHzxzL7PR7x93O2WbQoO%2BVYC9rFYutLu3d0nFXIUWOww%3D%3D"}]}
 nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
 server: cloudflare

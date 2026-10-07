@@ -218,9 +218,7 @@ pre{background:var(--surface2);border:1px solid var(--line);border-radius:6px;pa
   .mapbox{height:60vh}
 }
 </style>
-</head>
-<body>
-
+</head><body>
 
 <div class="app">
   <aside class="rail">
@@ -925,10 +923,81 @@ function coldTNTX(){
 }
 
 
+
+/* ---------- HPS reality: site, current operations, RoRo simulator ---------- */
+let rs={N:1500,D:40,km:7,v:25,B:2,seat:30,cost:70};
+function roroSim(p,opt){
+  const drive=p.km/p.v*60, ride=p.km/30*60;
+  const gate=opt?0.3:3, park=opt?1.5:4, wait=opt?4:12, quay=opt?1:2;
+  const cyc=drive+gate+park+wait+ride+quay;
+  let thr=p.D/cyc; const busCap=p.B*p.seat/(2*ride+5); const capped=thr>busCap; if(capped)thr=busCap;
+  const hrs=p.N/thr/60, dh=p.D*hrs;
+  return {cyc,thr:thr*60,hrs,dh,cost:dh*p.cost/1000,capped,parts:[['Lái xe từ cảng về bãi',drive],['Kiểm tra hư hỏng tại cổng',gate],['Tìm ô, đỗ xe',park],['Chờ xe đưa đón',wait],['Xe đưa đón quay lại cảng',ride],['Nhận xe, quét VIN tại cầu tàu',quay]]};
+}
+const OBS=[
+ ['Bãi xe','Bảng trắng Plan/Act theo dõi nhận xe, PDI, giao xe, tồn bãi, nhân lực ghi tay theo ngày','Số liệu chậm, khó tổng hợp cho OEM, không cảnh báo','Control Tower tự đếm từ lượt quét VIN','Phần mềm'],
+ ['Bãi xe','Check sheet phụ kiện Toyota bằng giấy, cắm theo ngăn mã model','Mất thời gian tìm, khó tra lại khi có khiếu nại','Checklist điện tử theo model trên điện thoại, có ảnh và chữ ký QC','Phần mềm'],
+ ['Bãi xe','Ma trận nhân sự (Group, B2, Wash/PDI/PPO) viết tay','Giao việc theo trí nhớ tổ trưởng','Tự giao việc theo kỹ năng, bằng lái, giờ làm','Phần mềm'],
+ ['Bãi xe','Thùng đầu audio PPO dán tem và đóng dấu kiểm tay','Không gắn được serial với VIN','Quét serial khi lắp, gắn vào hồ sơ VIN','Phần mềm'],
+ ['Bãi xe','Xe dỡ ở cảng Tân Vũ, lái khoảng 7 km về bãi tại Nam Đình Vũ','Nhiều lái xe, chờ xe đưa đón, điểm giao nhận dễ tranh chấp hư hỏng','Xếp ô trước khi tàu cập, điều xe đưa đón liên tục, cổng quét hư hỏng tại cổng vào bãi','Phần mềm + thiết bị vừa'],
+ ['Kho lạnh','Nhiệt độ cài từng kho ghi tay trên giấy dán dưới màn hình HMI Dãy 2','Không có lịch sử, sai sót khi đổi ca','Gateway Modbus đọc và ghi log nhiệt độ mỗi phút','Thiết bị nhỏ'],
+ ['Kho lạnh','Số điện thoại kỹ thuật dán trên tủ điều khiển','Báo động phụ thuộc người đứng gần tủ','Leo thang cảnh báo tự động qua Zalo/SMS','Phần mềm'],
+ ['Kho lạnh','Một màn hình nhiệt độ trên tủ Lobby không hiển thị','Mất giám sát một buồng mà không ai biết','Cảm biến độc lập cho mọi buồng, báo khi mất tín hiệu','Thiết bị nhỏ'],
+ ['Kho lạnh','Giá drive-in, ngày nhập viết tay lên bao hàng','Dễ kẹt lô, khó FEFO, kiểm kê lâu','Tem QR lô, gợi ý làn, chặn xuất sai làn; về sau xe shuttle radio trong giá hiện có','Phần mềm → thiết bị vừa'],
+ ['Kho lạnh','Cửa cuốn nhanh mở nhiều lần mỗi ngày','Thất thoát lạnh, đóng băng dàn','Đặt lịch xe vào dock, cảm biến cửa, cảnh báo mở lâu','Thiết bị nhỏ'],
+ ['Chung','Phòng máy nén có vết nứt tường; bình chữa cháy theo dõi bằng tem giấy','Rủi ro an toàn, khó chứng minh khi thanh tra','Phiếu sự cố có ảnh, kiểm tra PCCC bằng quét QR','Phần mềm']];
+const PRIO=[
+ ['Điều xe đưa đón và xếp ô trước cho lái xe dỡ tàu RoRo','Bãi xe',5,1,'Giảm khoảng 25–30% thời gian giải phóng tàu (xem mô phỏng)'],
+ ['Checklist PDI/PPO điện tử, quét VIN và serial','Bãi xe',4,1,'Bỏ giấy, tra cứu tức thì, bằng chứng cho OEM'],
+ ['Gateway Modbus + log nhiệt độ + leo thang cảnh báo','Kho lạnh',5,2,'Bằng chứng chuỗi lạnh, tránh hỏng hàng, giảm đi tuần'],
+ ['AI đọc tờ khai TNTX, đếm ngược hạn, đối soát tồn','Kho lạnh',5,1,'Tránh quá hạn tái xuất, giảm nhập liệu'],
+ ['Điều độ tàu lai + cước từ AIS + tốc độ kinh tế','Tàu lai',4,1,'Giảm dầu khoảng 8–10%, không sót cước'],
+ ['Tủ khóa điện tử cho chìa khóa xe','Bãi xe',3,2,'Hết thất lạc chìa, biết ai đang giữ xe'],
+ ['Đặt lịch xe vào dock kho lạnh và cổng giao xe','Kho lạnh',3,2,'Giảm chờ, giảm mở cửa kho'],
+ ['Hầm rửa xe tự động','Bãi xe',4,3,'Rửa 40–60 xe/giờ thay cho tổ rửa tay (số tham khảo, cần báo giá)'],
+ ['Cổng quét hư hỏng AI tại cổng vào bãi','Bãi xe',5,3,'Chấm dứt tranh chấp hư hỏng giữa cảng, HPS và OEM'],
+ ['Xe shuttle radio trong giá drive-in hiện có','Kho lạnh',4,4,'Tăng tốc nhập xuất, giảm xe nâng chạy trong kho lạnh']];
+function hpsReal(){
+  const a=roroSim(rs,0), o=roroSim(rs,1);
+  const f=(k,l,u,st)=>`<label class="field">${l}<input type="number" step="${st||1}" id="rs${k}" data-rs="${k}" value="${rs[k]}" style="width:100%"><span class="hint">${u}</span></label>`;
+  const bar=(parts,mx)=>parts.map(([n,v])=>`<div class="row" style="flex-wrap:nowrap;gap:8px;margin-top:4px"><span style="width:190px;flex:none;font-size:12px">${n}</span><div class="meter" style="flex:1"><span style="width:${v/mx*100}%;background:var(--navy)"></span></div><span class="mono" style="width:56px;text-align:right;font-size:12px">${v.toFixed(1).replace('.',',')} phút</span></div>`).join('');
+  return `<div class="grid g2"><div class="panel"><h2>Vị trí thực tế</h2>
+     <svg viewBox="0 0 400 230" style="width:100%;height:auto" role="img" aria-label="Sơ đồ vị trí HPS">
+      <path d="M0 150 C80 140 140 160 200 150 S330 120 400 135 L400 230 L0 230 Z" fill="var(--info-bg)"/>
+      <text x="300" y="200" style="font-size:11px;fill:var(--info)">Sông Bạch Đằng / Biển</text>
+      <path d="M60 70 L150 92 L232 112" stroke="var(--accent)" stroke-width="3" stroke-dasharray="6 4" fill="none"/>
+      ${[['Chùa Vẽ',18,40],['Tân Vũ',60,70],['HPS · KB1-1',232,112],['ICD Nam Đình Vũ',205,92],['Cảng Nam Đình Vũ',305,98],['Lạch Huyện',380,150]].map(([n,x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i===2?8:5}" fill="${i===2?'var(--accent)':'var(--ink)'}" stroke="var(--ink)"/><text x="${x+(i===4?0:i===5||i===3?-8:i===2?12:8)}" y="${i===2||i===5?y+20:y-9}" text-anchor="${i===4?'middle':i===5||i===3?'end':'start'}" style="font-size:11px;fill:var(--ink);font-family:var(--f-body);font-weight:${i===2?700:400}">${n}</text>`).join('')}
+      <text x="92" y="108" style="font-size:10px">≈ 7 km đường bộ</text><text x="244" y="100" style="font-size:10px">≈ 1 km</text>
+     </svg>
+     <div class="tbl"><table><tbody><tr><td class="hint">Trụ sở & kho</td><td>Lô KB1-1, KCN Nam Đình Vũ, Đông Hải, Hải Phòng (20.8161, 106.8105)</td></tr><tr><td class="hint">Sát bên</td><td>Kho bãi ngoại quan Sao Đỏ, ICD Nam Đình Vũ, khu phi thuế quan Nam Đình Vũ</td></tr><tr><td class="hint">Cảng dỡ xe RoRo</td><td>Tân Vũ, khoảng 5 km đường chim bay, khoảng 7 km đường bộ</td></tr><tr><td class="hint">Quy mô RoRo qua Tân Vũ</td><td>Năm 2025 khoảng 61 chuyến, khoảng 70.000 xe; một tàu có thể dỡ 1.300–1.700 xe</td></tr></tbody></table></div>
+     <p class="hint">Vị trí theo Google Maps; quy mô RoRo theo báo chí ngành. Khoảng cách đường bộ là ước tính.</p></div>
+    <div class="panel"><h2>Đặc thù quyết định giải pháp</h2><ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:13px">
+     <li><b>Tải không đều theo tàu.</b> Mỗi lần tàu RoRo cập là 1.300–1.700 xe dồn về trong 1–2 ngày, rồi có ngày rất ít. Cần lực lượng lái xe linh hoạt và điều phối tốt, không phải thêm người cố định.</li>
+     <li><b>Xe phải chạy đường bộ từ Tân Vũ về bãi.</b> Thời gian đi, chờ xe đưa đón và kiểm tra tại cổng chiếm phần lớn giờ công; cổng vào bãi là điểm giao nhận dễ tranh chấp hư hỏng nhất.</li>
+     <li><b>Khách là OEM Nhật, Mỹ.</b> TMV, MMV, Ford yêu cầu quy trình và bằng chứng chặt; số hóa là điều kiện giữ hợp đồng.</li>
+     <li><b>Kho lạnh lớn, giá drive-in, nhiều hàng TNTX.</b> Rủi ro lớn nhất là quá hạn tái xuất, lệch tồn theo tờ khai và mất nhiệt; tiền điện là chi phí lớn nhất.</li>
+     <li><b>Đã có nền điều khiển số.</b> Tủ điều khiển dùng HMI và bộ điều khiển điện tử nên đọc dữ liệu qua Modbus được, không phải thay hệ thống lạnh.</li></ol></div></div>
+   <div class="panel sec tbl"><h2>Hiện trạng tác nghiệp quan sát được</h2><table><thead><tr><th>Mảng</th><th>Đang làm</th><th>Vấn đề</th><th>Giải pháp tự động</th><th>Mức đầu tư</th></tr></thead><tbody>${OBS.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="hint">${r[2]}</td><td><b>${r[3]}</b></td><td><span class="chip ${r[4]==='Phần mềm'?'s-ok':r[4]==='Thiết bị nhỏ'?'s-info':'s-warn'}">${r[4]}</span></td></tr>`).join('')}</tbody></table>
+    <p class="hint">Rút ra từ ảnh và video hiện trường bãi xe KGL-HP và kho lạnh. Cần khảo sát trực tiếp để xác nhận và bổ sung.</p></div>
+   <div class="panel sec" style="border-color:var(--accent)"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Mô phỏng giải phóng một tàu RoRo</h2><span class="chip s-ai">Bấm thử</span></div>
+    <p class="hint">So sánh cách làm hiện tại với cách làm có app điều phối và cổng quét: xếp ô trước khi tàu cập, xe đưa đón chạy vòng liên tục, quét VIN tại cầu tàu, cổng quét hư hỏng tại bãi.</p>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">${f('N','Số xe trên tàu','xe')}${f('D','Số lái xe','người')}${f('km','Quãng đường','km',0.5)}${f('v','Tốc độ đoàn xe','km/h')}${f('B','Xe đưa đón','xe')}${f('seat','Chỗ mỗi xe đưa đón','chỗ')}${f('cost','Chi phí lái xe','nghìn đ/giờ')}</div>
+    <div class="row sec"><button class="btn acc" data-rsrun="1">Tính lại</button></div>
+    <div class="grid g4 sec"><div class="kpi"><div class="lbl">Thời gian giải phóng tàu</div><div class="val">${o.hrs.toFixed(1).replace('.',',')}<span style="font-size:18px"> giờ</span></div><div class="note">hiện tại ${a.hrs.toFixed(1).replace('.',',')} giờ · nhanh hơn ${Math.round((1-o.hrs/a.hrs)*100)}%</div></div>
+     <div class="kpi"><div class="lbl">Năng suất</div><div class="val">${Math.round(o.thr)}<span style="font-size:18px"> xe/giờ</span></div><div class="note">hiện tại ${Math.round(a.thr)} xe/giờ</div></div>
+     <div class="kpi"><div class="lbl">Giờ công lái xe</div><div class="val">${vnd(Math.round(o.dh))}</div><div class="note">hiện tại ${vnd(Math.round(a.dh))} giờ</div></div>
+     <div class="kpi"><div class="lbl">Tiết kiệm mỗi tàu</div><div class="val" style="color:var(--ok)">${vnd(Math.round(a.cost-o.cost))}<span style="font-size:18px"> tr</span></div><div class="note">khoảng ${vnd(Math.round((a.cost-o.cost)*61/1000*10)/10)} tỷ/năm với 61 chuyến</div></div></div>
+    ${o.capped||a.capped?`<p class="hint" style="color:var(--warn)">Xe đưa đón đang là điểm nghẽn: tăng số xe đưa đón hoặc số chỗ để lái xe không phải chờ.</p>`:''}
+    <div class="grid g2 sec"><div><h3>Một vòng của lái xe · hiện tại (${a.cyc.toFixed(0)} phút)</h3>${bar(a.parts,Math.max(...a.parts.map(x=>x[1])))}</div><div><h3>Một vòng · có app và cổng quét (${o.cyc.toFixed(0)} phút)</h3>${bar(o.parts,Math.max(...a.parts.map(x=>x[1])))}</div></div>
+    <p class="hint">Thời gian từng bước là giả định để minh hoạ, cần bấm giờ thực tế tại Tân Vũ và cổng bãi để hiệu chỉnh. Giờ lái xe chưa gồm nghỉ giữa ca.</p></div>
+   <div class="panel sec tbl"><h2>Thứ tự ưu tiên cho HPS</h2><table><thead><tr><th>#</th><th>Giải pháp</th><th>Mảng</th><th>Hiệu quả</th><th>Độ khó / vốn</th><th>Kết quả mong đợi</th></tr></thead><tbody>${PRIO.map((p,i)=>`<tr><td class="mono">${i+1}</td><td><b>${p[0]}</b></td><td>${p[1]}</td><td>${'●'.repeat(p[2])}<span style="opacity:.25">${'●'.repeat(5-p[2])}</span></td><td>${'●'.repeat(p[3])}<span style="opacity:.25">${'●'.repeat(5-p[3])}</span></td><td class="hint">${p[4]}</td></tr>`).join('')}</tbody></table>
+    <p class="hint">Ưu tiên việc hiệu quả cao, ít vốn trước (1–5: chủ yếu phần mềm, triển khai trong 3 tháng). Thiết bị lớn làm sau khi đã có dữ liệu chứng minh.</p></div>`;
+}
+
 /* ---------- Automation & ROI ---------- */
-let auTab='map', auMsg='';
-const POOLS=[['yard','Lái xe & kiểm đếm bãi',24],['pdi','KTV PDI / QC',14],['gate','Bảo vệ cổng',6],['cold','Thủ kho & kiểm đếm kho lạnh',10],['disp','Điều độ tàu lai & dịch vụ cảng',4],['office','Chứng từ, kế toán, nhập liệu',8]];
-let auHead={yard:24,pdi:14,gate:6,cold:10,disp:4,office:8}, auCost=12, auPower=265, auFuel=900;
+let auTab='hps', auMsg='';
+const POOLS=[['yard','Lái xe & kiểm đếm bãi',24],['pdi','KTV PDI / QC',14],['gate','Bảo vệ cổng',6],['cold','Thủ kho & kiểm đếm kho lạnh',10],['disp','Điều độ tàu lai & dịch vụ cảng',4],['office','Chứng từ, kế toán, nhập liệu',8],['wash','Rửa & đánh bóng xe',10]];
+let auHead={yard:24,pdi:14,gate:6,cold:10,disp:4,office:8,wash:10}, auCost=12, auPower=265, auFuel=900;
 // id, area, name, effects {pool:fraction}, energy saving (tr/month fn), capex (tr), opex tr/month, level, inApp, benchmark
 const SOL=[
  ['docs','Văn phòng','AI đọc chứng từ, tự lập hóa đơn, đối soát, nhắc nợ',{office:.4},()=>0,0,0,'Phần mềm','Đã có trong app'],
@@ -939,9 +1008,15 @@ const SOL=[
  ['drone','Bãi xe','Drone kiểm kê bãi ban đêm, đọc VIN qua kính lái',{yard:.1},()=>0,250,2,'Thiết bị nhỏ','Lộ trình'],
  ['scan','Bãi xe','Cổng quét hư hỏng tự động bằng AI (xe chạy qua, 200+ ảnh)',{pdi:.25,yard:.15},()=>0,1200,5,'Thiết bị vừa','Lộ trình'],
  ['rtls','Bãi xe','Định vị xe tự động (RTLS / thẻ BLE gắn tạm)',{yard:.2},()=>0,600,4,'Thiết bị vừa','Lộ trình'],
+ ['roro','Bãi xe','Điều xe đưa đón và xếp ô trước khi dỡ tàu RoRo',{yard:.15},()=>0,0,0,'Phần mềm','Đã có trong app'],
+ ['keys','Bãi xe','Tủ khóa điện tử quản lý chìa khóa xe',{yard:.03},()=>0,180,1,'Thiết bị nhỏ','Lộ trình'],
+ ['wash','Bãi xe','Hầm rửa xe tự động',{wash:.5},()=>0,3500,15,'Thiết bị vừa','Lộ trình'],
+ ['dock','Kho lạnh','Đặt lịch xe vào dock kho lạnh',{cold:.05},()=>auPower*.03,0,0,'Phần mềm','Đã có trong app'],
+ ['eco','Tàu lai','Tốc độ kinh tế khi tàu lai chạy không tải (theo AIS)',{},()=>auFuel*.05,0,0,'Phần mềm','Đã có trong app'],
+ ['radio','Kho lạnh','Xe shuttle radio trong giá drive-in hiện có',{cold:.25},()=>auPower*.04,2500,8,'Thiết bị vừa','Lộ trình'],
  ['robot','Bãi xe','Robot đỗ xe tự động, tăng mật độ bãi, chạy 24/7',{yard:.4},()=>0,25000,40,'Đầu tư lớn','Tham khảo'],
  ['asrs','Kho lạnh','Kho lạnh tự động shuttle 4 chiều cho dãy kho mới',{cold:.5},()=>auPower*.15,45000,60,'Đầu tư lớn','Tham khảo']];
-let auOn={docs:1,disp:1,coldai:1,ocr:1,rfid:1,drone:1,scan:1,rtls:0,robot:0,asrs:0};
+let auOn={docs:1,disp:1,roro:1,dock:1,eco:1,coldai:1,keys:1,ocr:1,rfid:1,drone:1,scan:1,wash:0,radio:0,rtls:0,robot:0,asrs:0};
 function auCalc(){
   const rem={};POOLS.forEach(([k])=>rem[k]=1);let energy=0,capex=0,opex=0;const per=[];
   SOL.forEach(s=>{if(!auOn[s[0]])return;let fte=0;Object.entries(s[3]).forEach(([k,r])=>{const before=auHead[k]*rem[k];rem[k]*=(1-r);fte+=before-auHead[k]*rem[k]});const e=s[4]();energy+=e;capex+=s[5];opex+=s[6];per.push({s,fte,save:fte*auCost+e-s[6]})});
@@ -960,8 +1035,9 @@ const BENCH=[
  ['Cảng Tuas (Singapore)','Cổng tự động dùng OCR bằng AI, drone giám sát, cảm biến; giảm thời gian quay vòng xe tải và thao tác thủ công.','https://ports.marinelink.com/ports/port/san-francisco/news/port-of-singapore-unveils-advanced-automated-gate-system-at-tuas-port','MarineLink'],
  ['Mammoet · Move3D','Lập phương án cẩu và vận chuyển siêu trọng trên mô hình 3D từ quét LIDAR, đám mây điểm, bản đồ vệ tinh; mô phỏng khớp thực tế khi thi công.','https://www.mammoet.com/resources/breaking-the-blueprint/','Mammoet']];
 function auto(){
-  const tabs=[['map','Giải pháp theo mảng'],['roi','Máy tính ROI'],['bench','Thế giới đang làm gì'],['road','Lộ trình triển khai']];
+  const tabs=[['hps','Thực tiễn HPS'],['map','Giải pháp theo mảng'],['roi','Máy tính ROI'],['bench','Thế giới đang làm gì'],['road','Lộ trình triển khai']];
   let b='';
+  if(auTab==='hps')b=hpsReal();
   if(auTab==='map'){
     const areas=['Bãi xe','Kho lạnh','Tàu lai','Văn phòng'];
     const lv=l=>l==='Phần mềm'?'s-ok':l==='Thiết bị nhỏ'?'s-info':l==='Thiết bị vừa'?'s-warn':'s-crit';
@@ -1450,6 +1526,16 @@ Object.assign(EN,{
 });
 RULES.push([/^Nguồn: (.+) ↗$/,m=>'Source: '+m[1]+' ↗']);
 
+Object.assign(EN,{
+"AI đọc tờ khai TNTX, đếm ngược hạn, đối soát tồn":"AI reads re-export declarations, counts down deadlines, reconciles stock","Giao việc theo trí nhớ tổ trưởng":"Jobs assigned from the team leader's memory","Báo động phụ thuộc người đứng gần tủ":"Alarms depend on someone standing near the panel","Bảng trắng Plan/Act theo dõi nhận xe, PDI, giao xe, tồn bãi, nhân lực ghi tay theo ngày":"Plan/Act whiteboard tracking receipts, PDI, deliveries, stock and manpower by hand each day","Bấm thử":"Try it","Bằng chứng chuỗi lạnh, tránh hỏng hàng, giảm đi tuần":"Cold-chain evidence, fewer spoilage losses, fewer patrol rounds","Bỏ giấy, tra cứu tức thì, bằng chứng cho OEM":"Paperless, instant lookup, evidence for OEMs","Check sheet phụ kiện Toyota bằng giấy, cắm theo ngăn mã model":"Paper Toyota accessory check sheets filed in pockets by model code","Checklist PDI/PPO điện tử, quét VIN và serial":"Electronic PDI/PPO checklists, VIN and serial scanning","Checklist điện tử theo model trên điện thoại, có ảnh và chữ ký QC":"Electronic per-model checklists on phones with photos and QC sign-off","Chi phí lái xe":"Driver cost","Chấm dứt tranh chấp hư hỏng giữa cảng, HPS và OEM":"Ends damage disputes between the port, HPS and OEMs","Chỗ mỗi xe đưa đón":"Seats per shuttle","Chờ xe đưa đón":"Waiting for shuttle","Control Tower tự đếm từ lượt quét VIN":"Control Tower counts automatically from VIN scans","Cảm biến độc lập cho mọi buồng, báo khi mất tín hiệu":"Independent sensors in every room, alerting on signal loss","Cảng Nam Đình Vũ":"Nam Dinh Vu Port","Cảng dỡ xe RoRo":"RoRo discharge port","Cổng quét hư hỏng AI tại cổng vào bãi":"AI damage scanner at the yard gate","Cửa cuốn nhanh mở nhiều lần mỗi ngày":"High-speed doors open many times a day","Dễ kẹt lô, khó FEFO, kiểm kê lâu":"Honeycombing, hard FEFO, slow stocktakes","Gateway Modbus + log nhiệt độ + leo thang cảnh báo":"Modbus gateway + temperature logging + alarm escalation","Gateway Modbus đọc và ghi log nhiệt độ mỗi phút":"Modbus gateway reads and logs temperature every minute","Giá drive-in, ngày nhập viết tay lên bao hàng":"Drive-in racks, receipt dates handwritten on bags","Giải pháp tự động":"Automation fix","Giảm chờ, giảm mở cửa kho":"Less waiting, fewer door openings","Giảm dầu khoảng #–#%, không sót cước":"Fuel down about #–#%, no missed billing","Giảm khoảng #–#% thời gian giải phóng tàu (xem mô phỏng)":"About #–#% faster vessel clearance (see simulation)","Giờ công lái xe":"Driver hours","Hiện trạng tác nghiệp quan sát được":"Observed current operations","Hiệu quả":"Impact","Hầm rửa xe tự động":"Automatic car wash tunnel","Hết thất lạc chìa, biết ai đang giữ xe":"No lost keys, always know who holds a car","ICD Nam Đình Vũ":"ICD Nam Dinh Vu","Kho bãi ngoại quan Sao Đỏ, ICD Nam Đình Vũ, khu phi thuế quan Nam Đình Vũ":"Sao Do bonded warehouse, ICD Nam Dinh Vu, Nam Dinh Vu non-tariff zone","Kho lạnh lớn, giá drive-in, nhiều hàng TNTX.":"Large cold store, drive-in racks, much re-export cargo.","Khách là OEM Nhật, Mỹ.":"Customers are Japanese and US OEMs.","Không có lịch sử, sai sót khi đổi ca":"No history, errors at shift change","Không gắn được serial với VIN":"Serials not linked to VINs","Kiểm tra hư hỏng tại cổng":"Damage check at gate","Kết quả mong đợi":"Expected result","Leo thang cảnh báo tự động qua Zalo/SMS":"Automatic alarm escalation via Zalo/SMS","Lái xe từ cảng về bãi":"Drive from port to yard","Lô KB1-1, KCN Nam Đình Vũ, Đông Hải, Hải Phòng (#, #)":"Lot KB1-1, Nam Dinh Vu IP, Dong Hai, Hai Phong (#, #)","Lạch Huyện":"Lach Huyen","Ma trận nhân sự (Group, B2, Wash/PDI/PPO) viết tay":"Handwritten staff matrix (Group, B2, Wash/PDI/PPO)","Mô phỏng giải phóng một tàu RoRo":"RoRo vessel clearance simulation","Mất giám sát một buồng mà không ai biết":"A room loses monitoring without anyone noticing","Mất thời gian tìm, khó tra lại khi có khiếu nại":"Slow to find, hard to trace when claims arise",
+"Mỗi lần tàu RoRo cập là #–# xe dồn về trong #–# ngày, rồi có ngày rất ít. Cần lực lượng lái xe linh hoạt và điều phối tốt, không phải thêm người cố định.":"Each RoRo call brings #–# cars within #–# days, then some days are very quiet. This needs a flexible driver pool and good coordination, not more permanent staff.",
+"Một màn hình nhiệt độ trên tủ Lobby không hiển thị":"A temperature display on the Lobby panel is dead","Một vòng của lái xe · hiện tại (# phút)":"One driver cycle · today (# min)","Một vòng · có app và cổng quét (# phút)":"One cycle · with app and scanner (# min)","Nhiều lái xe, chờ xe đưa đón, điểm giao nhận dễ tranh chấp hư hỏng":"Many drivers, shuttle waits, handover point prone to damage disputes","Nhiệt độ cài từng kho ghi tay trên giấy dán dưới màn hình HMI Dãy #":"Room setpoints handwritten on paper taped under the Row # HMI","Nhận xe, quét VIN tại cầu tàu":"Pick up car, scan VIN at quay",
+"Năm # khoảng # chuyến, khoảng # xe; một tàu có thể dỡ #–# xe":"In # about # calls and about # cars; one ship can discharge #–# cars","Năng suất":"Throughput","Phiếu sự cố có ảnh, kiểm tra PCCC bằng quét QR":"Photo incident tickets, fire checks by QR scan","Phòng máy nén có vết nứt tường; bình chữa cháy theo dõi bằng tem giấy":"Cracked wall in the compressor room; extinguishers tracked by paper tags","Phần mềm + thiết bị vừa":"Software + medium hardware","Phần mềm → thiết bị vừa":"Software → medium hardware","Quy mô RoRo qua Tân Vũ":"RoRo volume at Tan Vu","Quãng đường":"Distance","Quét serial khi lắp, gắn vào hồ sơ VIN":"Scan the serial at fitting, link to the VIN record","Rút ra từ ảnh và video hiện trường bãi xe KGL-HP và kho lạnh. Cần khảo sát trực tiếp để xác nhận và bổ sung.":"Drawn from site photos and videos of the KGL-HP yard and cold store. To be confirmed and extended by an on-site survey.","Rủi ro an toàn, khó chứng minh khi thanh tra":"Safety risk, hard to evidence at inspections","Rủi ro lớn nhất là quá hạn tái xuất, lệch tồn theo tờ khai và mất nhiệt; tiền điện là chi phí lớn nhất.":"The biggest risks are missed re-export deadlines, stock mismatches against declarations and temperature loss; power is the largest cost.","Rửa & đánh bóng xe":"Car wash & polish","Rửa #–# xe/giờ thay cho tổ rửa tay (số tham khảo, cần báo giá)":"Washes #–# cars/hour instead of manual teams (reference figure, quote needed)",
+"So sánh cách làm hiện tại với cách làm có app điều phối và cổng quét: xếp ô trước khi tàu cập, xe đưa đón chạy vòng liên tục, quét VIN tại cầu tàu, cổng quét hư hỏng tại bãi.":"Compare today's method with app coordination and scanning: slots assigned before berthing, shuttles running a continuous loop, VIN scan at the quay, damage scanner at the yard.","Sát bên":"Next door","Sông Bạch Đằng / Biển":"Bach Dang River / Sea","Sơ đồ vị trí HPS":"HPS location map","Số liệu chậm, khó tổng hợp cho OEM, không cảnh báo":"Late data, hard to report to OEMs, no alerts","Số lái xe":"Drivers","Số xe trên tàu":"Cars on vessel","Số điện thoại kỹ thuật dán trên tủ điều khiển":"Technician phone numbers taped on the control panel","TMV, MMV, Ford yêu cầu quy trình và bằng chứng chặt; số hóa là điều kiện giữ hợp đồng.":"TMV, MMV and Ford demand strict processes and evidence; digitalisation is what keeps the contracts.","Tem QR lô, gợi ý làn, chặn xuất sai làn; về sau xe shuttle radio trong giá hiện có":"QR lot tags, lane suggestions, wrong-lane blocking; later radio shuttles in the existing racks","Thùng đầu audio PPO dán tem và đóng dấu kiểm tay":"PPO audio boxes labelled and stamped by hand","Thất thoát lạnh, đóng băng dàn":"Cold loss, iced evaporators","Thời gian giải phóng tàu":"Vessel clearance time",
+"Thời gian từng bước là giả định để minh hoạ, cần bấm giờ thực tế tại Tân Vũ và cổng bãi để hiệu chỉnh. Giờ lái xe chưa gồm nghỉ giữa ca.":"Step times are illustrative assumptions, to be calibrated by timing at Tan Vu and the yard gate. Driver hours exclude breaks.","Thời gian đi, chờ xe đưa đón và kiểm tra tại cổng chiếm phần lớn giờ công; cổng vào bãi là điểm giao nhận dễ tranh chấp hư hỏng nhất.":"Driving, shuttle waits and gate checks take most of the labour hours; the yard gate is the handover point most prone to damage disputes.","Thứ tự ưu tiên cho HPS":"Priorities for HPS","Thực tiễn HPS":"HPS reality","Tiết kiệm mỗi tàu":"Saving per vessel","Tránh quá hạn tái xuất, giảm nhập liệu":"No missed re-export deadlines, less data entry","Trụ sở & kho":"Head office & stores","Tân Vũ, khoảng # km đường chim bay, khoảng # km đường bộ":"Tan Vu, about # km straight line, about # km by road","Tìm ô, đỗ xe":"Find slot, park","Tính lại":"Recalculate","Tăng tốc nhập xuất, giảm xe nâng chạy trong kho lạnh":"Faster in/out, fewer forklifts running in the cold","Tải không đều theo tàu.":"Workload follows ship arrivals.","Tốc độ kinh tế khi tàu lai chạy không tải (theo AIS)":"Eco speed for tugs running light (from AIS)","Tốc độ đoàn xe":"Convoy speed","Tủ khóa điện tử cho chìa khóa xe":"Electronic key cabinet for car keys","Tủ khóa điện tử quản lý chìa khóa xe":"Electronic key cabinet for car keys","Tủ điều khiển dùng HMI và bộ điều khiển điện tử nên đọc dữ liệu qua Modbus được, không phải thay hệ thống lạnh.":"Panels already use HMIs and electronic controllers, so data can be read over Modbus without replacing the refrigeration system.","Tự giao việc theo kỹ năng, bằng lái, giờ làm":"Automatic assignment by skills, licence, hours worked","Vị trí theo Google Maps; quy mô RoRo theo báo chí ngành. Khoảng cách đường bộ là ước tính.":"Locations from Google Maps; RoRo volumes from trade press. Road distances are estimates.","Vị trí thực tế":"Actual location","Xe dỡ ở cảng Tân Vũ, lái khoảng # km về bãi tại Nam Đình Vũ":"Cars discharged at Tan Vu are driven about # km to the Nam Dinh Vu yard","Xe phải chạy đường bộ từ Tân Vũ về bãi.":"Cars travel by road from Tan Vu to the yard.","Xe shuttle radio trong giá drive-in hiện có":"Radio shuttles in the existing drive-in racks","Xe đưa đón":"Shuttle buses","Xe đưa đón quay lại cảng":"Shuttle back to port","Xếp ô trước khi tàu cập, điều xe đưa đón liên tục, cổng quét hư hỏng tại cổng vào bãi":"Assign slots before berthing, run shuttles continuously, AI damage scanner at the yard gate","chỗ":"seats","hiện tại # giờ":"today # h","hiện tại # giờ · nhanh hơn #%":"today # h · #% faster","hiện tại # xe/giờ":"today # cars/h","khoảng # tỷ/năm với # chuyến":"about VND # billion/year over # calls","nghìn đ/giờ":"VND '000/hour","người":"people","xe/giờ":"cars/h","Điều xe đưa đón và xếp ô trước cho lái xe dỡ tàu RoRo":"Shuttle dispatch and pre-assigned slots for RoRo discharge drivers","Điều xe đưa đón và xếp ô trước khi dỡ tàu RoRo":"Shuttle dispatch and pre-assigned slots for RoRo discharge","Điều độ tàu lai + cước từ AIS + tốc độ kinh tế":"Tug dispatch + AIS billing + eco speed","Đã có nền điều khiển số.":"Digital controls are already in place.","Đặc thù quyết định giải pháp":"What shapes the solution","Đặt lịch xe vào dock kho lạnh":"Cold-store dock booking","Đặt lịch xe vào dock kho lạnh và cổng giao xe":"Dock booking for the cold store and the delivery gate","Đặt lịch xe vào dock, cảm biến cửa, cảnh báo mở lâu":"Dock booking, door sensors, open-too-long alerts","Độ khó / vốn":"Effort / capex","Ưu tiên việc hiệu quả cao, ít vốn trước (#–#: chủ yếu phần mềm, triển khai trong # tháng). Thiết bị lớn làm sau khi đã có dữ liệu chứng minh.":"High-impact, low-capex items first (#–#: mainly software, live within # months). Big equipment only after data proves the case.","≈ # km đường bộ":"≈ # km by road","xe":"cars","km":"km","giờ":"h","phút":"min"
+});
+
+Object.assign(EN,{"Lô KB1-1, KCN Nam Đình Vũ, Đông Hải, Hải Phòng (20.8161, 106.8105)":"Lot KB1-1, Nam Dinh Vu IP, Dong Hai, Hai Phong (20.8161, 106.8105)","Lô KB1-1, KCN Nam Đình Vũ, Đông Hải, Hải Phòng (#, #)":"Lot KB1-1, Nam Dinh Vu IP, Dong Hai, Hai Phong (#, #)"});
 function trS(t){
   if(!t)return t; if(EN[t]!==undefined)return EN[t];
   if(t.startsWith('· '))return '· '+trS(t.slice(2));
@@ -1513,7 +1599,8 @@ function bindView(){
   const ds=document.getElementById('dsave'); if(ds)ds.addEventListener('click',()=>{dlog.unshift({a:dsel,t:document.getElementById('dt').value,s:document.getElementById('ds').value,p:document.getElementById('dp').value});dsel=null;render()});
 }
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-autab],[data-tgtab],[data-tgassign],[data-ogtab],[data-ogcheck],[data-fintab],[data-finact],[data-finsample],[data-fmsample],[data-fmparse],[data-fmcreate],[data-fmstorm],[data-fmact],[data-lang],[data-ctab],[data-cact],[data-fmsite],[data-fmtab],[data-map],[data-mz],[data-mf],[data-mgps],[data-go],[data-vin],[data-close],[data-ask],[data-zone],[data-fs],[data-shot]'); if(!t)return;
+  const t=e.target.closest('[data-rsrun],[data-autab],[data-tgtab],[data-tgassign],[data-ogtab],[data-ogcheck],[data-fintab],[data-finact],[data-finsample],[data-fmsample],[data-fmparse],[data-fmcreate],[data-fmstorm],[data-fmact],[data-lang],[data-ctab],[data-cact],[data-fmsite],[data-fmtab],[data-map],[data-mz],[data-mf],[data-mgps],[data-go],[data-vin],[data-close],[data-ask],[data-zone],[data-fs],[data-shot]'); if(!t)return;
+  if(t.dataset.rsrun){Object.keys(rs).forEach(k=>{const v=parseFloat((document.getElementById('rs'+k)||{}).value);if(v>0)rs[k]=v});render();return}
   if(t.dataset.autab){auTab=t.dataset.autab;render();return}
   if(t.dataset.tgtab){tgTab=t.dataset.tgtab;tgMsg='';render();return}
   if(t.dataset.tgassign!==undefined){const m=MOVES[+t.dataset.tgassign];const a=tugAssign(m);m.tugs=a.pick;m.st=a.ok?'Đã phân công':'Thiếu tàu lai';tgMsg=lang==='en'?`${m.ship}: assigned ${a.pick.join(', ')} (total ${a.bp} t)${a.ok?'. Orders sent to tug masters by app.':'. Still short; hire-in request sent to partner tugs.'}`:`${m.ship}: đã phân công ${a.pick.join(', ')} (tổng ${a.bp} t)${a.ok?'. Lệnh đã gửi thuyền trưởng tàu lai qua app.':'. Vẫn thiếu, đã gửi yêu cầu thuê tàu lai đối tác.'}`;render();return}
@@ -1548,11 +1635,9 @@ document.addEventListener('click',e=>{
   if(t.dataset.shot!==undefined){shots[+t.dataset.shot]=1;render();return}
   if(t.dataset.fs!==undefined){fs=+t.dataset.fs;if(fs===0)shots=[0,0,0,0];render();return}
 });
-document.addEventListener('change',e=>{const d=e.target.dataset||{};if(d.auon){auOn[d.auon]=e.target.checked?1:0;render();return}if(d.auh){auHead[d.auh]=Math.max(0,+e.target.value||0);render();return}if(d.aux){const v=Math.max(0,+e.target.value||0);if(d.aux==='cost')auCost=v||1;if(d.aux==='power')auPower=v;if(d.aux==='fuel')auFuel=v;render();return}const sl=e.target.dataset&&e.target.dataset.sla;if(sl){const v=parseInt(e.target.value,10);if(v>0)fmSla(sl,v);return}const m=e.target.dataset&&e.target.dataset.mod;if(!m)return;enabled[m]=e.target.checked;try{localStorage.setItem('c24mods',JSON.stringify(enabled))}catch(err){}renderNav()});
+document.addEventListener('change',e=>{const d=e.target.dataset||{};if(d.rs){const v=parseFloat(e.target.value);if(v>0){rs[d.rs]=v;render()}return}if(d.auon){auOn[d.auon]=e.target.checked?1:0;render();return}if(d.auh){auHead[d.auh]=Math.max(0,+e.target.value||0);render();return}if(d.aux){const v=Math.max(0,+e.target.value||0);if(d.aux==='cost')auCost=v||1;if(d.aux==='power')auPower=v;if(d.aux==='fuel')auFuel=v;render();return}const sl=e.target.dataset&&e.target.dataset.sla;if(sl){const v=parseInt(e.target.value,10);if(v>0)fmSla(sl,v);return}const m=e.target.dataset&&e.target.dataset.mod;if(!m)return;enabled[m]=e.target.checked;try{localStorage.setItem('c24mods',JSON.stringify(enabled))}catch(err){}renderNav()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('ov').innerHTML=''});
 render();
 </script>
-
 <script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
-</body>
-</html>
+</body></html>

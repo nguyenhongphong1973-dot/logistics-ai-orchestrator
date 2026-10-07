@@ -2,7 +2,7 @@ name: hps-ai-check
 on:
   push:
     branches: [hps-ai-check]
-    paths: ['.github/workflows/hps-ai-check.yml', 'check/trigger.txt', 'check/e2e.js']
+    paths: ['.github/workflows/hps-ai-check.yml', 'check/trigger.txt', 'check/e2e.js', 'check/az.txt']
 permissions:
   contents: write
 jobs:
@@ -14,6 +14,12 @@ jobs:
         run: |
           O="https://nguyenhongphong1973-dot.github.io"; E="https://cic-survey.pages.dev/api/hps-ai"
           mkdir -p check; R=check/result.txt; : > $R
+          echo "== AZURE" >> $R
+          curl -s -m 90 https://vicmac-proxy.onrender.com/ping -o /dev/null -w "ping %{http_code} %{time_total}s\n" >> $R
+          curl -s -m 90 -X POST https://vicmac-proxy.onrender.com/ai-status -H "content-type: application/json" -d '{}' | head -c 600 >> $R; echo >> $R
+          curl -s -m 90 -X POST https://vicmac-proxy.onrender.com/ai-doc-cau -H "Origin: https://nguyenhongphong1973-dot.github.io" -H "content-type: application/json" -d '{"chu":"Kho 8 đang cảnh báo nghiêm trọng, khoảng 3,4 giờ nữa chạm âm 18 độ.","giong":"viet"}' -o check/az.json -D check/az.hdr -w "doc-cau %{http_code} %{time_total}s %{size_download}B\n" >> $R
+          python3 -c "import json,base64;d=json.load(open('check/az.json'));print('ok',d.get('ok'),d.get('giong'),d.get('error'));open('check/az.mp3','wb').write(base64.b64decode(d['mp3'])) if d.get('mp3') else None" >> $R 2>&1
+          grep -i "access-control" check/az.hdr >> $R; rm -f check/az.json check/az.hdr
           echo "== HEALTH" >> $R; curl -s -w "\nHTTP %{http_code}\n" "$E" >> $R
           echo "== CIC LOCKED (expect 302)" >> $R
           for u in https://cic-survey.pages.dev/bizdata.js https://cic-survey.pages.dev/ https://cic-survey.pages.dev/api/certs https://main.cic-survey.pages.dev/bizdata.js https://cic-survey.pages.dev/api/hps-ai2; do echo "$(curl -s -o /dev/null -w '%{http_code}' "$u")  $u" >> $R; done

@@ -1,0 +1,27 @@
+name: hps-ai-check
+on:
+  push:
+    branches: [hps-ai-check]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Health
+        run: curl -s -w "\nHTTP %{http_code}\n" https://cic-survey.pages.dev/api/hps-ai
+      - name: CIC data still locked (expect 302)
+        run: |
+          for u in https://cic-survey.pages.dev/bizdata.js https://cic-survey.pages.dev/ https://cic-survey.pages.dev/api/certs https://main.cic-survey.pages.dev/bizdata.js https://cic-survey.pages.dev/api/hps-ai/../../bizdata.js; do echo "$(curl -s -o /dev/null -w '%{http_code}' "$u")  $u"; done
+      - name: Real AI call (quick)
+        run: |
+          curl -s -w "\nHTTP %{http_code}\n" -X POST https://cic-survey.pages.dev/api/hps-ai \
+            -H "Origin: https://nguyenhongphong1973-dot.github.io" -H "content-type: application/json" \
+            -d '{"tier":"quick","max_tokens":80,"messages":[{"role":"user","content":"Trả lời đúng 1 câu tiếng Việt: cảng RoRo Tân Vũ ở thành phố nào?"}]}'
+      - name: Real AI call (default, vision model path)
+        run: |
+          curl -s -w "\nHTTP %{http_code}\n" -X POST https://cic-survey.pages.dev/api/hps-ai \
+            -H "Origin: https://nguyenhongphong1973-dot.github.io" -H "content-type: application/json" \
+            -d '{"max_tokens":60,"messages":[{"role":"user","content":"Reply with only the JSON {\"ok\":true}"}]}'
+      - name: Wrong origin rejected (expect 403)
+        run: curl -s -w "\nHTTP %{http_code}\n" -X POST https://cic-survey.pages.dev/api/hps-ai -H "Origin: https://evil.example" -H "content-type: application/json" -d '{"messages":[{"role":"user","content":"x"}]}'
+      - name: CORS preflight
+        run: curl -s -i -X OPTIONS https://cic-survey.pages.dev/api/hps-ai -H "Origin: https://nguyenhongphong1973-dot.github.io" -H "Access-Control-Request-Method: POST" | head -12

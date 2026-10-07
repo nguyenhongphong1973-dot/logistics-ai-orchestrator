@@ -18,12 +18,12 @@ HTTP 200
 HTTP 403
 == PREFLIGHT
 HTTP/2 204 
-date: Wed, 07 Oct 2026 08:54:18 GMT
+date: Wed, 07 Oct 2026 08:59:18 GMT
 access-control-allow-origin: https://nguyenhongphong1973-dot.github.io
 vary: Origin
 access-control-allow-headers: content-type
 access-control-allow-methods: GET, POST, OPTIONS
 access-control-max-age: 86400
-report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=GPpA%2BcDHPOEVCku9jjDx0hFhwycLovMhCMfEdVu626AcCBKAdJe0GLEGOsB%2FOUl3Cj%2Ft2zCDHyX%2BqJ56my5NIH4aOUs9OAzOlPJJ1mdSnC0cXQTDIa%2F9Lzq%2FnBC0Hl73HoJqw8hFrg%3D%3D"}]}
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=XObAdX4tby0HG5W2jN%2FW0fRncVajtK3YmGTazpUvkhtUt7lTcxkeq17PyoIzGOuBecDUlRCs%2FFi9UnW20Mf09jtyDq7ENx3n%2FFpU6SmJoKrW8Sx9Wy4BJx%2BLusLsSGwXSSfZupjl9w%3D%3D"}]}
 nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
 server: cloudflare

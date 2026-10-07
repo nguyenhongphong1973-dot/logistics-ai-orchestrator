@@ -1158,7 +1158,7 @@ function aiFail(e){const c=e&&e.code;
   if(c==='invalid_json')return L('AI trả lời chưa đúng định dạng, bấm thử lại.','AI reply was not in the expected format, try again.');
   if(c==='cancelled')return '';
   return L('Mất kết nối tới AI, thử lại.','Lost connection to AI, try again.')}
-const md=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#+\s*/gm,'').replace(/^[-•]\s+/gm,'• ');
+const md=s=>esc(s).replace(/^(Hiểu là|Understood as):\s*(.+)$/m,'<span class="hint" style="display:block;margin-bottom:4px">🎧 $1: <i>$2</i></span>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#+\s*/gm,'').replace(/^[-•]\s+/gm,'• ');
 
 /* ---- 1. YARD SLOT OPTIMISATION (real metres on the satellite map) ---- */
 const PDI_PT=[243,493], HZ=7;
@@ -1313,16 +1313,18 @@ function aiRules(){return L(
 `You are the operations assistant of HPS (Hai Phong Port Services JSC). The user is a port manager. Answer in English, briefly (about 120 words max), using port/logistics terms. Use only figures from the DATA or tools, never invent. If the data does not have it, say so. When useful, end with one concrete action. No tables, no headings. You are the "HPS AI assistant"; do not name the underlying model or AI vendor. If asked which AI it is, say it is the AI assistant built into the HPS system and return to the task. Questions may come from speech recognition, so interpret typos in port context. Vietnamese status names in data: Nhập bãi=received, Chờ PDI=awaiting PDI, Đang PDI=in PDI, Bảo dưỡng=maintenance, Sẵn sàng=ready.`)+'\n\nDỮ LIỆU / DATA:\n'+snapshot()}
 async function aiAsk(q){
   const c=document.getElementById('chat');if(!c||aiBusy)return;aiBusy=true;
-  c.insertAdjacentHTML('beforeend',`<div class="msg u">${esc(q)}</div><div class="msg a ai" style="white-space:pre-wrap"><span class="hint">${L('Đang suy nghĩ…','Thinking…')}</span></div>`);
+  c.insertAdjacentHTML('beforeend',`<div class="msg u">${voiceTurn?'🎙 ':''}${esc(q)}</div><div class="msg a ai" style="white-space:pre-wrap"><span class="hint">${L('Đang suy nghĩ…','Thinking…')}</span></div>`);
   const b=c.lastElementChild;c.scrollTop=c.scrollHeight;
-  chatTurns.push({role:'user',content:q});if(chatTurns.length>8)chatTurns=chatTurns.slice(-8);
+  const vt=voiceTurn&&voiceAlts.length;
+  const content=vt?(L(`[Câu hỏi bằng GIỌNG NÓI, có thể nhận dạng sai. Các phương án máy nghe được: ${voiceAlts.map((a,k)=>`(${k+1}) "${a}"`).join(' ')}. Bản đã sửa thuật ngữ: "${q}". ${VGLOSS} Hãy chọn cách hiểu hợp lý nhất với công việc cảng HPS. DÒNG ĐẦU TIÊN của câu trả lời phải là: Hiểu là: <câu hỏi đã chuẩn hóa, viết đúng chính tả>. Nếu vẫn mơ hồ thì hỏi lại ngắn gọn thay vì đoán.]`,`[SPOKEN question, may be misrecognised. Alternatives heard: ${voiceAlts.map((a,k)=>`(${k+1}) "${a}"`).join(' ')}. Pick the most plausible meaning for HPS port work. FIRST LINE of the answer must be: Understood as: <cleaned question>. If still ambiguous, ask a short clarifying question instead of guessing.]`)):q;
+  chatTurns.push({role:'user',content});if(chatTurns.length>8)chatTurns=chatTurns.slice(-8);
   while(chatTurns.length&&chatTurns[0].role!=='user')chatTurns.shift();
   const input=[{role:'user',content:aiRules()},...chatTurns];
   const opt={cache:false,modelTier:'quick',onText:({text})=>{b.innerHTML=md(text);c.scrollTop=c.scrollHeight}};
   if(AItools){delete opt.cache;opt.tools=AITOOLS.map(t=>({...t,execute:(i)=>{b.innerHTML=`<span class="hint">${L('Đang tra dữ liệu','Querying data')}: ${t.name}…</span>`;return t.execute(i||{})}}))}
   try{const r=await AI(input,opt);b.innerHTML=md(r.text);chatTurns.push({role:'assistant',content:r.text});if(voiceTurn)speak(r.text)}
   catch(e){const m=aiFail(e);b.innerHTML=(e.text?md(e.text)+'<br>':'')+`<span class="hint">${esc(m)}</span>`;chatTurns.pop();if(AIstate!=='on')b.insertAdjacentHTML('afterend',`<div class="msg a">${esc(lang==='en'?answerEN(q):answer(q))}</div>`)}
-  aiBusy=false;voiceTurn=false;c.scrollTop=c.scrollHeight;
+  aiBusy=false;voiceTurn=false;voiceAlts=[];c.scrollTop=c.scrollHeight;
 }
 
 /* ---- 3. VISION: damage photos and TNTX declarations ---- */
@@ -1376,20 +1378,36 @@ function tkPanel(){
   </div>`;
 }
 
+/* ---- VOICE NORMALISER: port jargon spoken in Vietnamese → canonical terms ---- */
+const NUMW={'không':0,'một':1,'mốt':1,'hai':2,'ba':3,'bốn':4,'tư':4,'năm':5,'lăm':5,'sáu':6,'bảy':7,'bẩy':7,'tám':8,'chín':9,'mười':10};
+const VR=(src,to)=>[new RegExp('(?<![\\p{L}\\d])(?:'+src+')(?![\\p{L}\\d])','giu'),to];
+const VRULES=[
+ VR('(?:t[eêi]|ti)\\s*(?:em|mờ|m)\\s*(?:v[eêi]|vi)','TMV'),VR('(?:em|mờ)\\s*(?:em|mờ)\\s*(?:v[eêi]|vi)','MMV'),
+ VR('(?:p[eêi]|pi|b[eê])\\s*(?:đ[eêi]|đi|di)\\s*(?:i|ai)','PDI'),VR('(?:p[eêi]|pi)\\s*(?:p[eêi]|pi)\\s*(?:ô|o|âu)','PPO'),
+ VR('(?:t[eê]|ti)\\s*(?:en|nờ)\\s*(?:t[eê]|ti)\\s*(?:ích xì|ích|x)','TNTX'),VR('t[aạ]m nh[aậ]p t[aá]i xu[aấ]t','TNTX'),
+ VR('r[oôơ]\\s*-?\\s*r[oôơ]','RoRo'),VR('phót|phốt|phớt','Ford'),VR('(?<=xe |hãng |của )(?:pho|phò|phô)','Ford'),
+ VR('(?:mít su|mitsu|mít xu)\\s*bi\\s*(?:si|shi)?','Mitsubishi'),VR('tô y ô ta|tôi ô ta|toi ô ta','Toyota'),
+ VR('vin|vanh|vịn','VIN'),VR('tân vụ','Tân Vũ'),VR('nam đình vụ','Nam Đình Vũ'),VR('ô ô gờ|o o g','OOG'),
+ VR('kho\\s+(không|một|hai|ba|bốn|năm|sáu|bảy|bẩy|tám|chín|mười)',(m,w)=>'Kho '+NUMW[w.toLowerCase()]),
+ VR('khu\\s+(a|bê|b|xê|c|đê|d)',(m,w)=>'khu '+({a:'A','bê':'B',b:'B','xê':'C',c:'C','đê':'D',d:'D'}[w.toLowerCase()])),
+ VR('tàu\\s+lại','tàu lai'),VR('siêu trường siêu chọng','siêu trường siêu trọng')];
+function normVoice(t){let x=String(t||'');for(const [re,to] of VRULES)x=x.replace(re,to);return x.replace(/\s+/g,' ').trim()}
+const VGLOSS='Từ điển thuật ngữ khi người dùng NÓI (nhận dạng giọng nói hay viết sai): "tê em vê/ti em vi"=TMV (Toyota Việt Nam); "em em vê"=MMV (Mitsubishi); "phốt/pho"=Ford; "pê đê i/pi đi ai"=PDI; "pê pê ô"=PPO (lắp audio); "tê en tê ích"=TNTX (tạm nhập tái xuất); "rô rô"=RoRo; "vin/vanh"=VIN, ký tự VIN có thể bị đọc rời từng chữ; "tàu lại"=tàu lai; "kho tám"=Kho 8; "khu bê"=khu B; số đọc bằng chữ thì hiểu thành số.';
+
 /* ---- VOICE: speak the question, hear the answer ---- */
 const SRc=window.SpeechRecognition||window.webkitSpeechRecognition;
-let micRec=null, voiceTurn=false;
-function speak(t){try{if(!window.speechSynthesis||!t)return;const u=new SpeechSynthesisUtterance(String(t).replace(/\*\*/g,'').replace(/[•#]/g,'').slice(0,600));u.lang=lang==='en'?'en-US':'vi-VN';const v=speechSynthesis.getVoices().find(x=>x.lang&&x.lang.toLowerCase().startsWith(lang==='en'?'en':'vi'));if(v)u.voice=v;u.rate=1.05;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+let micRec=null, voiceTurn=false, voiceAlts=[];
+function speak(t){try{if(!window.speechSynthesis||!t)return;const u=new SpeechSynthesisUtterance(String(t).replace(/^(Hiểu là|Understood as):.*$/m,'').replace(/\*\*/g,'').replace(/[•#]/g,'').slice(0,600));u.lang=lang==='en'?'en-US':'vi-VN';const v=speechSynthesis.getVoices().find(x=>x.lang&&x.lang.toLowerCase().startsWith(lang==='en'?'en':'vi'));if(v)u.voice=v;u.rate=1.05;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
 function bindMic(){const b=document.getElementById('micbtn'),h=document.getElementById('michint');if(!b)return;
   if(!SRc){b.style.display='none';return}
   b.onclick=()=>{
     if(micRec){micRec.stop();return}
     try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}
-    const r=new SRc();r.lang=lang==='en'?'en-US':'vi-VN';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
-    const i=document.getElementById('chatq');let txt='';
-    r.onresult=e=>{let t='';for(let k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;txt=t;i.value=t};
+    const r=new SRc();r.lang=lang==='en'?'en-US':'vi-VN';r.interimResults=true;r.continuous=false;r.maxAlternatives=3;
+    const i=document.getElementById('chatq');let txt='',alts=[];
+    r.onresult=e=>{let t='';for(let k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;txt=t;i.value=lang==='en'?t:normVoice(t);const last=e.results[e.results.length-1];if(last&&last.isFinal!==false){alts=[];for(let a=0;a<(last.length||1);a++)if(last[a]&&last[a].transcript)alts.push(last[a].transcript)}};
     r.onerror=e=>{if(h)h.textContent=e.error==='not-allowed'||e.error==='service-not-allowed'?L('Trình duyệt chưa cho dùng micro. Bấm biểu tượng ổ khóa trên thanh địa chỉ → cho phép Micro.','Microphone blocked. Tap the lock icon in the address bar → allow Microphone.'):e.error==='no-speech'?L('Chưa nghe thấy gì, bấm micro và nói lại.','Heard nothing, tap the mic and try again.'):L('Không nhận được giọng nói, thử lại hoặc gõ chữ.','Speech not recognised, try again or type.')};
-    r.onend=()=>{micRec=null;b.classList.remove('rec');if(h&&h.dataset.l)h.textContent='';const q=txt.trim();if(q){i.value='';voiceTurn=true;ask(q)}};
+    r.onend=()=>{micRec=null;b.classList.remove('rec');if(h&&h.dataset.l)h.textContent='';const raw=txt.trim();if(raw){i.value='';voiceTurn=true;voiceAlts=alts.length?alts:[raw];ask(lang==='en'?raw:normVoice(raw))}};
     micRec=r;b.classList.add('rec');if(h){h.textContent=L('Đang nghe… nói xong sẽ tự gửi. Bấm lại để dừng.','Listening… sends when you stop. Tap again to stop.');h.dataset.l=1}
     try{r.start()}catch(e){micRec=null;b.classList.remove('rec')}
   }}
@@ -1909,7 +1927,7 @@ function answerEN(q){
 
 /* ---------- assistant ---------- */
 function answer(q){
-  const s=q.toLowerCase().normalize('NFC');
+  q=normVoice(q);const s=q.toLowerCase().normalize('NFC');
   const tok=(q.toUpperCase().match(/[A-Z0-9]{5,}/g)||[]);
   for(const t of tok){const v=V.find(x=>x.vin.includes(t));if(v)return `VIN ${v.vin}: ${OEMS[v.oem].name} ${v.model}, ô ${v.slot}, trạng thái ${v.status}${v.holds.length?', đang bị chặn '+v.holds.join('/'):''}. Đã ở bãi ${v.arr} ngày.`}
   for(const o of Object.keys(OEMS))if(s.includes(o.toLowerCase())||s.includes(OEMS[o].name.split(' ')[0].toLowerCase())){const a=V.filter(v=>v.oem===o);return `${o} đang tồn ${a.length} xe: ${a.filter(v=>v.status==='Sẵn sàng').length} sẵn sàng, ${a.filter(v=>v.arr>30).length} xe quá 30 ngày, ${a.filter(v=>v.holds.length).length} xe bị chặn.`}

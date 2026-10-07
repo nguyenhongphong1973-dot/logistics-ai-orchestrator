@@ -2,26 +2,28 @@ name: hps-ai-check
 on:
   push:
     branches: [hps-ai-check]
+    paths: ['.github/workflows/hps-ai-check.yml', 'check/trigger.txt']
+permissions:
+  contents: write
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Health
-        run: curl -s -w "\nHTTP %{http_code}\n" https://cic-survey.pages.dev/api/hps-ai
-      - name: CIC data still locked (expect 302)
+      - uses: actions/checkout@v4
+      - name: Run checks
         run: |
-          for u in https://cic-survey.pages.dev/bizdata.js https://cic-survey.pages.dev/ https://cic-survey.pages.dev/api/certs https://main.cic-survey.pages.dev/bizdata.js https://cic-survey.pages.dev/api/hps-ai/../../bizdata.js; do echo "$(curl -s -o /dev/null -w '%{http_code}' "$u")  $u"; done
-      - name: Real AI call (quick)
-        run: |
-          curl -s -w "\nHTTP %{http_code}\n" -X POST https://cic-survey.pages.dev/api/hps-ai \
-            -H "Origin: https://nguyenhongphong1973-dot.github.io" -H "content-type: application/json" \
-            -d '{"tier":"quick","max_tokens":80,"messages":[{"role":"user","content":"Trả lời đúng 1 câu tiếng Việt: cảng RoRo Tân Vũ ở thành phố nào?"}]}'
-      - name: Real AI call (default, vision model path)
-        run: |
-          curl -s -w "\nHTTP %{http_code}\n" -X POST https://cic-survey.pages.dev/api/hps-ai \
-            -H "Origin: https://nguyenhongphong1973-dot.github.io" -H "content-type: application/json" \
-            -d '{"max_tokens":60,"messages":[{"role":"user","content":"Reply with only the JSON {\"ok\":true}"}]}'
-      - name: Wrong origin rejected (expect 403)
-        run: curl -s -w "\nHTTP %{http_code}\n" -X POST https://cic-survey.pages.dev/api/hps-ai -H "Origin: https://evil.example" -H "content-type: application/json" -d '{"messages":[{"role":"user","content":"x"}]}'
-      - name: CORS preflight
-        run: curl -s -i -X OPTIONS https://cic-survey.pages.dev/api/hps-ai -H "Origin: https://nguyenhongphong1973-dot.github.io" -H "Access-Control-Request-Method: POST" | head -12
+          O="https://nguyenhongphong1973-dot.github.io"; E="https://cic-survey.pages.dev/api/hps-ai"
+          mkdir -p check; R=check/result.txt; : > $R
+          echo "== HEALTH" >> $R; curl -s -w "\nHTTP %{http_code}\n" "$E" >> $R
+          echo "== CIC LOCKED (expect 302)" >> $R
+          for u in https://cic-survey.pages.dev/bizdata.js https://cic-survey.pages.dev/ https://cic-survey.pages.dev/api/certs https://main.cic-survey.pages.dev/bizdata.js https://cic-survey.pages.dev/api/hps-ai2; do echo "$(curl -s -o /dev/null -w '%{http_code}' "$u")  $u" >> $R; done
+          echo "== AI QUICK" >> $R
+          curl -s -w "\nHTTP %{http_code}\n" -X POST "$E" -H "Origin: $O" -H "content-type: application/json" -d '{"tier":"quick","max_tokens":80,"messages":[{"role":"user","content":"Trả lời đúng 1 câu tiếng Việt: cảng RoRo Tân Vũ ở thành phố nào?"}]}' >> $R
+          echo "== AI DEFAULT" >> $R
+          curl -s -w "\nHTTP %{http_code}\n" -X POST "$E" -H "Origin: $O" -H "content-type: application/json" -d '{"max_tokens":60,"messages":[{"role":"user","content":"Reply with only: OK"}]}' >> $R
+          echo "== WRONG ORIGIN (expect 403)" >> $R
+          curl -s -w "\nHTTP %{http_code}\n" -X POST "$E" -H "Origin: https://evil.example" -H "content-type: application/json" -d '{"messages":[{"role":"user","content":"x"}]}' >> $R
+          echo "== PREFLIGHT" >> $R
+          curl -s -i -X OPTIONS "$E" -H "Origin: $O" -H "Access-Control-Request-Method: POST" | head -10 >> $R
+          git config user.name ci; git config user.email ci@users.noreply.github.com
+          git add check/result.txt; git commit -m "check result [skip ci]"; git push

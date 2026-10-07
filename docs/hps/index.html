@@ -1279,7 +1279,7 @@ function learnPanel(){
 }
 
 /* ---- 2. CONTROL TOWER ASSISTANT: AI with page tools over live app data ---- */
-let chatTurns=[], aiBusy=false;
+let chatTurns=[], aiBusy=false, SAY=[];
 function snapshot(){
   const by=o=>V.filter(v=>v.oem===o), cnt=(a,f)=>a.filter(f).length;
   const lines=[`Ngày: ${dd(0)}/2026. Đơn vị: HPS – Công ty CP Dịch vụ Cảng Hải Phòng, Lô KB1-1 KCN Nam Đình Vũ. Bãi xe nhận xe RoRo từ cảng Tân Vũ (~7 km đường bộ), kho lạnh, tàu lai, hàng siêu trường siêu trọng.`];
@@ -1324,7 +1324,7 @@ async function aiAsk(q){
   const input=px?[...chatTurns]:[{role:'user',content:aiRules()+'\n\n=== HẾT HƯỚNG DẪN. Câu hỏi của người dùng ở lượt dưới. ==='},...chatTurns];
   const opt={cache:false,modelTier:px?'default':'quick',system:px?aiRules():undefined,onText:({text})=>{b.innerHTML=md(text);c.scrollTop=c.scrollHeight}};
   if(AItools){delete opt.cache;opt.tools=AITOOLS.map(t=>({...t,execute:(i)=>{b.innerHTML=`<span class="hint">${L('Đang tra dữ liệu','Querying data')}: ${t.name}…</span>`;return t.execute(i||{})}}))}
-  try{const r=await AI(input,opt);b.innerHTML=md(r.text);chatTurns.push({role:'assistant',content:r.text});if(voiceTurn)speak(r.text)}
+  try{const r=await AI(input,opt);b.innerHTML=md(r.text);SAY.push(r.text);b.insertAdjacentHTML('beforeend',`<button class="chip" data-x="say" data-i="${SAY.length-1}" style="margin-top:6px;cursor:pointer" aria-label="${L('Nghe câu trả lời','Listen to answer')}">🔊 ${L('Nghe','Listen')}</button>`);chatTurns.push({role:'assistant',content:r.text});if(voiceTurn)speak(r.text)}
   catch(e){const m=aiFail(e);b.innerHTML=(e.text?md(e.text)+'<br>':'')+`<span class="hint">${esc(m)}</span>`;chatTurns.pop();if(AIstate!=='on')b.insertAdjacentHTML('afterend',`<div class="msg a">${esc(lang==='en'?answerEN(q):answer(q))}</div>`)}
   aiBusy=false;voiceTurn=false;voiceAlts=[];c.scrollTop=c.scrollHeight;
 }
@@ -1401,12 +1401,44 @@ const SRc=window.SpeechRecognition||window.webkitSpeechRecognition;
 let micRec=null, voiceTurn=false, voiceAlts=[];
 function pickVoice(){try{const vs=speechSynthesis.getVoices()||[];const want=lang==='en'?'en':'vi';const c=vs.filter(v=>v.lang&&v.lang.toLowerCase().replace('_','-').startsWith(want));if(!c.length)return null;const score=v=>(/natural|neural|online/i.test(v.name)?4:0)+(/hoaimy|hoài my|namminh|linh|google/i.test(v.name)?2:0)+(v.localService?0:1);return c.sort((x,y)=>score(y)-score(x))[0]}catch(e){return null}}
 try{if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{}}catch(e){}
-function speak(t){try{if(!window.speechSynthesis||!t)return;const v=pickVoice();if(!v){const h=document.getElementById('michint');if(h)h.textContent=L('Máy này chưa có giọng đọc tiếng Việt nên chỉ hiện chữ.','No voice for this language on this device, showing text only.');return}const u=new SpeechSynthesisUtterance(String(t).replace(/^(Hiểu là|Understood as):.*$/m,'').replace(/\*\*/g,'').replace(/[•#🎧🎙]/g,'').replace(/…(\d{4})/g,' đuôi $1').slice(0,600));u.voice=v;u.lang=v.lang;u.rate=1;u.pitch=1;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+const VOICE_API='https://vicmac-proxy.onrender.com';
+try{if(/^https?:/.test(location.protocol))fetch(VOICE_API+'/ping',{mode:'cors'}).catch(()=>{})}catch(e){}
+let azAudio=null, azFail=0;
+function silentWav(){const n=800,b=new ArrayBuffer(44+n*2),v=new DataView(b);const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,16000,true);v.setUint32(28,32000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);return URL.createObjectURL(new Blob([b],{type:'audio/wav'}))}
+function unlockAudio(){try{if(!azAudio)azAudio=new Audio();azAudio.src=silentWav();azAudio.play().catch(()=>{})}catch(e){}}
+function cleanSay(t){return String(t||'').replace(/^(Hiểu là|Understood as):.*$/m,'').replace(/\*\*/g,'').replace(/[•#🎧🎙]/g,'').replace(/…(\d{4})/g,' đuôi $1').replace(/\s+/g,' ').trim().slice(0,1100)}
+async function speakAzure(t){if(azFail>=2)throw 0;const r=await fetch(VOICE_API+'/ai-doc-cau',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chu:t,giong:lang==='en'?'my':'viet'})});const j=await r.json();if(!j||!j.ok||!j.mp3){azFail++;throw 0}azFail=0;if(!azAudio)azAudio=new Audio();try{azAudio.pause()}catch(e){}azAudio.src='data:audio/mp3;base64,'+j.mp3;await azAudio.play()}
+function speakDevice(t){try{if(!window.speechSynthesis||!t)return;const v=pickVoice();if(!v){const h=document.getElementById('michint');if(h)h.textContent=L('Chưa phát được giọng đọc trên máy này, đang hiện chữ.','Could not play voice on this device, showing text.');return}const u=new SpeechSynthesisUtterance(t);u.voice=v;u.lang=v.lang;u.rate=1;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+function stopSpeak(){try{if(azAudio)azAudio.pause()}catch(e){}try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}}
+function speak(t){const c=cleanSay(t);if(!c)return;stopSpeak();speakAzure(c).catch(()=>speakDevice(c))}
+/* Azure speech-to-text fallback when the browser has no speech recognition (e.g. in-app browsers) */
+let azRec=null;
+async function azRecord(b,h){
+  if(azRec){azRec.stop();return}
+  stopSpeak();unlockAudio();
+  let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true}})}catch(e){if(h)h.textContent=L('Trình duyệt chưa cho dùng micro. Cho phép Micro rồi thử lại, hoặc mở link bằng Chrome/Safari.','Microphone blocked. Allow it, or open the link in Chrome/Safari.');return}
+  const AC=window.AudioContext||window.webkitAudioContext,ctx=new AC(),src=ctx.createMediaStreamSource(stream),proc=ctx.createScriptProcessor(4096,1,1),buf=[];
+  let heard=false,quiet=0,t0=Date.now();
+  const stop=async()=>{if(!azRec)return;azRec=null;try{proc.disconnect();src.disconnect();stream.getTracks().forEach(x=>x.stop())}catch(e){}b.classList.remove('rec');
+    const sr=ctx.sampleRate;try{ctx.close()}catch(e){}
+    const len=buf.reduce((a,x)=>a+x.length,0);if(len<sr*0.5){if(h)h.textContent=L('Chưa nghe thấy gì, bấm micro và nói lại.','Heard nothing, tap the mic and try again.');return}
+    const all=new Float32Array(len);let o=0;buf.forEach(x=>{all.set(x,o);o+=x.length});
+    const ratio=sr/16000,n=Math.floor(len/ratio),pcm=new Int16Array(n);for(let i=0;i<n;i++){const v=Math.max(-1,Math.min(1,all[Math.floor(i*ratio)]));pcm[i]=v<0?v*0x8000:v*0x7fff}
+    const ab=new ArrayBuffer(44+n*2),dv=new DataView(ab);const w=(q,t)=>{for(let i=0;i<t.length;i++)dv.setUint8(q+i,t.charCodeAt(i))};w(0,'RIFF');dv.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,16000,true);dv.setUint32(28,32000,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);w(36,'data');dv.setUint32(40,n*2,true);new Int16Array(ab,44).set(pcm);
+    let bin='';const u8=new Uint8Array(ab);for(let i=0;i<u8.length;i+=0x8000)bin+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));
+    if(h)h.textContent=L('Đang nhận dạng giọng nói…','Recognising speech…');
+    try{const r=await fetch(VOICE_API+'/ai-nghe-noi',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wavBase64:btoa(bin),lang:lang==='en'?'en-US':'vi-VN'})});const j=await r.json();
+      const raw=String(j&&j.chu||'').trim();if(!j.ok||!raw){if(h)h.textContent=L('Không nhận được giọng nói, thử lại hoặc gõ chữ.','Speech not recognised, try again or type.');return}
+      if(h)h.textContent='';voiceTurn=true;voiceAlts=[raw];ask(lang==='en'?raw:normVoice(raw))}
+    catch(e){if(h)h.textContent=L('Mất kết nối máy nhận giọng, thử lại hoặc gõ chữ.','Speech service unreachable, try again or type.')}};
+  proc.onaudioprocess=e=>{const d=e.inputBuffer.getChannelData(0);buf.push(new Float32Array(d));let m=0;for(let i=0;i<d.length;i+=16)m=Math.max(m,Math.abs(d[i]));if(m>0.06){heard=true;quiet=0}else if(heard)quiet+=d.length/ctx.sampleRate;if((heard&&quiet>1.3)||Date.now()-t0>15000)stop()};
+  src.connect(proc);proc.connect(ctx.destination);azRec={stop};b.classList.add('rec');if(h)h.textContent=L('Đang nghe… nói xong dừng 1 giây là tự gửi.','Listening… pause for a second to send.');
+}
 function bindMic(){const b=document.getElementById('micbtn'),h=document.getElementById('michint');if(!b)return;
-  if(!SRc){b.style.display='none';return}
+  if(!SRc){if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&(window.AudioContext||window.webkitAudioContext)){b.onclick=()=>azRecord(b,h)}else b.style.display='none';return}
   b.onclick=()=>{
     if(micRec){micRec.stop();return}
-    try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}
+    stopSpeak();unlockAudio();
     const r=new SRc();r.lang=lang==='en'?'en-US':'vi-VN';r.interimResults=true;r.continuous=false;r.maxAlternatives=3;
     const i=document.getElementById('chatq');let txt='',alts=[];
     r.onresult=e=>{let t='';for(let k=0;k<e.results.length;k++)t+=e.results[k][0].transcript;txt=t;i.value=lang==='en'?t:normVoice(t);const last=e.results[e.results.length-1];if(last&&last.isFinal!==false){alts=[];for(let a=0;a<(last.length||1);a++)if(last[a]&&last[a].transcript)alts.push(last[a].transcript)}};
@@ -1418,6 +1450,7 @@ function bindMic(){const b=document.getElementById('micbtn'),h=document.getEleme
 
 /* ---- shared click handler for the smart layer ---- */
 document.addEventListener('click',e=>{const t=e.target.closest('[data-x]');if(!t)return;const a=t.dataset.x;
+  if(a==='say'){unlockAudio();speak(SAY[+t.dataset.i]||'');return}
   if(a==='ypcalc'){yp=yardPlan();render();return}
   if(a==='ypclear'){yp=null;render();return}
   if(a==='ypapply'){applyPlan();render();return}

@@ -159,6 +159,7 @@ svg text{fill:var(--muted);font-family:var(--f-mono);font-size:10px}
 .big{font-family:var(--f-disp);font-size:30px;font-weight:700;line-height:1}
 /* chat */
 .chat{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow:auto;padding-right:4px}
+body:not(.aion) .ai-only{display:none}body.aion .ai-off{display:none}body:not(.aiimg) .ai-img-only{display:none}body.aiimg .ai-noimg{display:none}
 .msg{padding:8px 11px;border-radius:8px;font-size:13px;max-width:92%}
 .msg.u{align-self:flex-end;background:var(--ink);color:var(--surface)}
 .msg.a{align-self:flex-start;background:var(--surface2);border:1px solid var(--line)}
@@ -363,7 +364,7 @@ function tower(){
   const AL=[
    ['crit','Kho 8 nhiệt độ tăng liên tục',`Hiện ${kho8.now}°C (cài ${kho8.sp}°C), tăng ${slope.toFixed(2)}°C/giờ. Dự báo chạm ngưỡng −18°C sau ~${eta} giờ. Đã báo cấp 1: Mr Cường.`,'cold'],
    ['warn',`${sla} lệnh giao xe hết hạn D+2 hôm nay`,'Ưu tiên rửa và soát xe trước 14:00. Có 2 xe còn cờ chặn hải quan.','gate'],
-   ['ai',`Tàu Pacific Bloom V.2610 · ETA 03/10 22:00 · 412 xe`,'Đề xuất ca đêm: 14 lái xe B2, 4 kiểm đếm, 2 QC. Dự kiến cần thêm 180 ô ở khu A/B, hiện còn trống '+(ZR*ZC*2-by('TMV').length)+' ô.','hr'],
+   ['ai',`Tàu Pacific Bloom V.2610 · ETA 03/10 22:00 · 412 xe`,'Đề xuất ca đêm: '+staffForecast().plan[0].need+' lái xe B2, 4 kiểm đếm, 2 QC. Dự kiến cần thêm 180 ô ở khu A/B, hiện còn trống '+(ZR*ZC*2-by('TMV').length)+' ô.','hr'],
    ['warn',`${due} xe đến hạn bảo dưỡng tồn`,'Nổ máy, kiểm tra ắc quy, áp suất lốp theo chu kỳ của từng OEM. Lệnh việc đã tự tạo.','wo'],
    ['warn',`${unbilled.length} lệnh việc đã xong nhưng chưa có dòng cước`,'Ước thất thu '+vnd(unbilled.reduce((a,w)=>a+(RATES[w.t]||0),0))+' đ. Bấm để rà soát.','bill'],
    ['ai','Tháng 9: 1.240 việc được AI tự xử lý','Tương đương 6,2 người làm toàn thời gian. Xem thêm giải pháp và máy tính hoàn vốn.','auto'],
@@ -381,9 +382,9 @@ function tower(){
   <div class="grid g2 sec">
    <div class="panel"><h2>Cảnh báo thông minh</h2><div class="alerts">${AL.map(([k,t,p,go])=>`<div class="alert"><span class="bar" style="background:${col[k]}"></span><div><b>${t}</b><p>${p}</p></div><button class="btn" data-go="${go}">Xử lý</button></div>`).join('')}</div></div>
    <div class="panel"><h2>Trợ lý HPS</h2><div class="chat" id="chat"><div class="msg a">Hỏi tôi về VIN, tồn bãi, kho lạnh, nhân lực hoặc bảo dưỡng. Ví dụ gõ 5 ký tự cuối của VIN.</div></div>
-    <div class="sugs">${['Tồn TMV?','Lịch tàu lai hôm nay?','Dự án siêu trọng?','Hàng TNTX sắp hết hạn?','Kho 8 thế nào?','Xe nào cần bảo dưỡng?','Tàu tới cần bao nhiêu người?',V[3].vin.slice(-6)].map(s=>`<button data-ask="${s}">${s}</button>`).join('')}</div>
+    <div class="sugs">${['Tồn TMV?','Lịch tàu lai hôm nay?','Dự án siêu trọng?','Hàng TNTX sắp hết hạn?','Kho 8 thế nào?','Xe nào cần bảo dưỡng?','Tàu tới cần bao nhiêu người?',V[3].vin.slice(-6),'Xếp lại bãi tiết kiệm được bao nhiêu?','Xe Ford nào tồn quá 30 ngày?'].map(s=>`<button data-ask="${s}">${s}</button>`).join('')}</div>
     <form class="chatin" id="chatf"><input id="chatq" placeholder="Hỏi bằng tiếng Việt…" aria-label="Câu hỏi"><button class="btn pri">Gửi</button></form>
-    <p class="hint">Bản thật dùng Claude API, truy vấn trực tiếp dữ liệu bãi. Bản mẫu này trả lời theo luật đơn giản.</p></div>
+    <p class="hint"><span class="chip" data-aibadge>…</span> <span class="ai-only">${L("Claude đọc trực tiếp dữ liệu bãi, kho lạnh, tàu lai, nhân lực trong app; tự chạy tối ưu xếp ô và dự báo nhân lực khi cần. Hỏi câu bất kỳ.","Claude reads live yard, cold-store, towage and manpower data in the app, and runs the slot optimiser or manpower forecast when needed. Ask anything.")}</span><span class="ai-off">${L("Mở bản demo trên Claude để hỏi đáp bằng AI thật. Bản này trả lời theo luật cho các câu mẫu.","Open the demo in Claude for live AI answers. This view answers sample questions by rules.")}</span></p></div>
   </div>
   <div class="panel sec"><h2>Tồn bãi TMV tháng 9/2026: Plan và Act</h2>${stockChart()}<p class="hint">Số liệu chép từ ảnh bảng trắng TMV-KGL, cần đối chiếu lại. Bản thật: Plan lấy từ shipping advice của OEM (AI đọc file Excel/PDF), Act tự đếm từ lượt quét VIN.</p></div>`;
 }
@@ -407,7 +408,7 @@ function stockChart(){
 let yf={oem:'',st:'',q:''}, sug=null;
 function yard(){
   const newcar={oem:'TMV',model:'IXG',due:'03/10'};
-  if(!sug){for(const z of ['A','B'])for(let r=1;r<=ZR&&!sug;r++)for(let c=1;c<=ZC&&!sug;c++){const id=z+'-'+String(r).padStart(2,'0')+'-'+String(c).padStart(2,'0');if(!slots[id])sug=id}}
+  const nc={oem:'TMV',model:'IXG',status:'Nhập bãi',out:2,holds:[]};sug=bestSlot(nc);const sd=sug?dists(sug):{g:0,p:0};
   const match=v=>(!yf.oem||v.oem===yf.oem)&&(!yf.st||v.status===yf.st||(yf.st==='HOLD'&&v.holds.length))&&(!yf.q||v.vin.includes(yf.q.toUpperCase()));
   const zone=z=>{let h='';for(let r=1;r<=ZR;r++)for(let c=1;c<=ZC;c++){const id=z+'-'+String(r).padStart(2,'0')+'-'+String(c).padStart(2,'0');const v=slots[id];
     h+=v?`<button class="slot f ${v.holds.length?'hold':''} ${match(v)?'':'dim'}" style="background:${ST[v.status]}" data-vin="${v.vin}" title="${id} · ${v.vin} · ${v.model}" aria-label="${id} ${v.model}"></button>`:`<button class="slot ${id===sug?'sug':''}" title="${id} trống" aria-label="${id} trống" tabindex="-1"></button>`}
@@ -422,7 +423,7 @@ function yard(){
    </div>
    ${res.length?`<div class="tbl sec"><table><tbody>${res.map(v=>`<tr class="click" data-vin="${v.vin}"><td class="vin">${hl(v.vin,yf.q)}</td><td>${oemChip(v.oem)} ${v.model}</td><td class="mono">${v.slot}</td><td>${stChip(v.status)} ${holdChips(v)}</td></tr>`).join('')}</tbody></table></div>`:''}
    <div class="legend sec">${Object.entries(ST).map(([k,c])=>`<span><i style="background:${c}"></i>${k}</span>`).join('')}<span><i style="outline:2px solid var(--crit);outline-offset:-2px"></i>Có cờ chặn</span><span><i style="outline:2px dashed var(--accent)"></i>Ô gợi ý</span></div></div>
-  <div class="panel sec" style="border-color:var(--accent)"><div class="row" style="justify-content:space-between"><div><span class="chip s-ai">AI gợi ý ô đỗ</span> Xe vừa quét: ${oemChip('TMV')} IXG, giao dự kiến ${newcar.due} → đỗ vào <b class="mono">${sug}</b></div><button class="btn" data-go="map">Mở bản đồ bãi</button><span class="hint">Lý do: đúng khu OEM, dãy gần cổng xuất vì sắp giao, cùng lô tàu V.2609, cách xưởng PDI 40 m</span></div></div>
+  <div class="panel sec" style="border-color:var(--accent)"><div class="row" style="justify-content:space-between"><div><span class="chip s-ai">AI gợi ý ô đỗ</span> Xe vừa quét: ${oemChip('TMV')} IXG, giao dự kiến ${newcar.due} → đỗ vào <b class="mono">${sug}</b></div><button class="btn" data-go="map">Mở bản đồ bãi</button><span class="hint">${L(`Lý do: đúng khu OEM, sắp giao và còn chờ PDI nên chọn ô có tổng quãng lái ngắn nhất: tới xưởng PDI ${Math.round(sd.p)} m, tới cổng ${Math.round(sd.g)} m (tối ưu trên ${OEMS.TMV.zones.length*ZR*ZC} ô)`,`Why: right OEM zone; leaving soon and awaiting PDI, so the slot with the shortest total drive: ${Math.round(sd.p)} m to the PDI workshop, ${Math.round(sd.g)} m to the gate (optimised over ${OEMS.TMV.zones.length*ZR*ZC} slots)`)}</span></div></div>
   <div class="zones sec">${['A','B','C','D'].map(zone).join('')}</div>`;
 }
 const hl=(vin,q)=>{if(!q)return vin;const i=vin.indexOf(q.toUpperCase());return i<0?vin:vin.slice(0,i)+'<b>'+vin.slice(i,i+q.length)+'</b>'+vin.slice(i+q.length)};
@@ -605,7 +606,7 @@ function hr(){
   `<div class="grid g4"><div class="panel kpi"><div class="lbl">Đã chấm vào</div><div class="val">${cin}/${STAFF.length}</div><div class="note">Ca ngày 06:30–18:30</div></div>
    <div class="panel kpi"><div class="lbl">Năng suất PDI</div><div class="val">1,9</div><div class="note">xe / người / giờ · T9</div></div>
    <div class="panel kpi"><div class="lbl">Nhân công / VIN</div><div class="val">118k</div><div class="note">đ, trung bình TMV · T9</div></div>
-   <div class="panel kpi"><div class="lbl">Đề xuất ca đêm 03/10</div><div class="val">20</div><div class="note">người, theo ETA tàu V.2610</div></div></div>
+   <div class="panel kpi"><div class="lbl">Đề xuất ca đêm 03/10</div><div class="val">${staffForecast().plan[0].need+6}</div><div class="note">người, theo ETA tàu V.2610</div></div></div><div class="sec">${forecastPanel()}</div>
   <div class="panel sec tbl"><table><thead><tr><th>Nhân viên</th><th>Tổ</th><th>Group</th><th>Bằng</th><th>Vai trò</th><th>Kỹ năng</th><th>Vào ca</th><th class="n">Giờ hôm nay</th><th>OT tháng (trần 40h)</th><th class="n">Phút lạnh</th><th>Trạng thái</th></tr></thead><tbody>
   ${STAFF.map(s=>`<tr><td><b>${s.n}</b></td><td>${s.team}</td><td>${s.g}</td><td>${s.l||'—'}</td><td>${s.a}</td><td>${s.sk.map(k=>`<span class="chip">${k}</span>`).join(' ')||'—'}</td><td class="mono">${s.in||'—'}</td><td class="n mono">${s.h}</td><td><div class="meter" style="width:110px"><span style="width:${Math.min(100,s.ot/40*100)}%;background:${s.ot>=36?'var(--warn)':'var(--ok)'}"></span></div><span class="hint mono">${s.ot}h</span></td><td class="n mono">${s.cold?`<span style="color:${s.cold>=60?'var(--crit)':'inherit'}">${s.cold}</span>`:'—'}</td><td>${flag(s)}</td></tr>`).join('')}
   </tbody></table></div>
@@ -916,7 +917,7 @@ function coldTNTX(){
     <div class="panel kpi"><div class="lbl">Xe đang đi cửa khẩu</div><div class="val">3</div><div class="note">GPS theo dõi, ETA Lạng Sơn 18:30</div></div>
     <div class="panel kpi"><div class="lbl">Lệch tồn theo tờ khai</div><div class="val" style="color:var(--warn)">1</div><div class="note">cần đối soát</div></div></div>
    <div class="panel sec tbl"><h2>Hàng tạm nhập tái xuất trong kho</h2><table><thead><tr><th>Tờ khai</th><th>Chủ hàng</th><th>Mặt hàng</th><th class="n">Pallet</th><th>Ngày nhập</th><th>Còn đến hạn tái xuất</th><th>Kiểm dịch</th><th>Cửa khẩu dự kiến</th></tr></thead><tbody>${TNTX.map(t=>`<tr><td class="mono">${t[0]}</td><td>${t[1]}</td><td>${t[2]}</td><td class="n mono">${t[3]}</td><td class="mono">${t[4]}</td><td>${expChip(t[5])}</td><td><span class="chip ${t[6].startsWith('Đã')?'s-ok':'s-warn'}">${t[6]}</span></td><td>${t[7]}</td></tr>`).join('')}</tbody></table>
-    <p class="hint">Thời hạn lưu kho và tái xuất cấu hình theo quy định hải quan hiện hành. Số tờ khai đã che bớt.</p></div>
+    <p class="hint">Thời hạn lưu kho và tái xuất cấu hình theo quy định hải quan hiện hành. Số tờ khai đã che bớt.</p></div>${tkPanel()}
    <div class="grid g2 sec"><div class="panel"><h2>AI đề xuất</h2><div class="alerts">
      <div class="alert"><span class="bar" style="background:var(--crit)"></span><div><b>Tờ khai …4521 còn 9 ngày</b><p>12 pallet thịt bò ở Kho 9. Đề xuất xếp 1 xe lạnh đi Lạng Sơn trong 3 ngày tới, ghép với lô …4688 nếu kiểm dịch xong.</p></div><span></span></div>
      <div class="alert"><span class="bar" style="background:var(--warn)"></span><div><b>Cửa khẩu Lạng Sơn đang ùn xe lạnh</b><p>Thời gian chờ trung bình 2 ngày. Đề xuất chuyển lô …4610 sang Móng Cái hoặc báo chủ hàng điều chỉnh.</p></div><span></span></div>
@@ -930,7 +931,7 @@ function coldTNTX(){
 let rs={N:1500,D:40,km:7,v:25,B:2,seat:30,cost:70};
 function roroSim(p,opt){
   const drive=p.km/p.v*60, ride=p.km/30*60;
-  const gate=opt?0.3:3, park=opt?1.5:4, wait=opt?4:12, quay=opt?1:2;
+  const C=CAL||{gate:3,park:4,wait:12,quay:2};const gate=opt?0.3:C.gate, park=opt?1.5:C.park, wait=opt?Math.min(4,C.wait):C.wait, quay=opt?1:C.quay;
   const cyc=drive+gate+park+wait+ride+quay;
   let thr=p.D/cyc; const busCap=p.B*p.seat/(2*ride+5); const capped=thr>busCap; if(capped)thr=busCap;
   const hrs=p.N/thr/60, dh=p.D*hrs;
@@ -1009,6 +1010,7 @@ function hpsReal(){
     ${o.capped||a.capped?`<p class="hint" style="color:var(--warn)">Xe đưa đón đang là điểm nghẽn: tăng số xe đưa đón hoặc số chỗ để lái xe không phải chờ.</p>`:''}
     <div class="grid g2 sec"><div><h3>Một vòng của lái xe · hiện tại (${a.cyc.toFixed(0)} phút)</h3>${bar(a.parts,Math.max(...a.parts.map(x=>x[1])))}</div><div><h3>Một vòng · có app và cổng quét (${o.cyc.toFixed(0)} phút)</h3>${bar(o.parts,Math.max(...a.parts.map(x=>x[1])))}</div></div>
     <p class="hint">Thời gian từng bước là giả định để minh hoạ, cần bấm giờ thực tế tại Tân Vũ và cổng bãi để hiệu chỉnh. Giờ lái xe chưa gồm nghỉ giữa ca.</p></div>
+   <div class="sec">${learnPanel()}</div>
    <div class="panel sec tbl"><h2>Thứ tự ưu tiên cho HPS</h2><table><thead><tr><th>#</th><th>Giải pháp</th><th>Mảng</th><th>Hiệu quả</th><th>Độ khó / vốn</th><th>Kết quả mong đợi</th></tr></thead><tbody>${PRIO.map((p,i)=>`<tr><td class="mono">${i+1}</td><td><b>${p[0]}</b></td><td>${p[1]}</td><td>${'●'.repeat(p[2])}<span style="opacity:.25">${'●'.repeat(5-p[2])}</span></td><td>${'●'.repeat(p[3])}<span style="opacity:.25">${'●'.repeat(5-p[3])}</span></td><td class="hint">${p[4]}</td></tr>`).join('')}</tbody></table>
     <p class="hint">Ưu tiên việc hiệu quả cao, ít vốn trước (1–5: chủ yếu phần mềm, triển khai trong 3 tháng). Thiết bị lớn làm sau khi đã có dữ liệu chứng minh.</p></div>`;
 }
@@ -1097,8 +1099,267 @@ function auto(){
    `<div class="panel"><div class="row" role="tablist">${tabs.map(([k,n])=>`<button class="btn ${auTab===k?'pri':''}" data-autab="${k}" role="tab" aria-selected="${auTab===k}">${n}</button>`).join('')}</div></div><div class="sec">${b}</div>`;
 }
 
+/* ================= SMART LAYER: real optimisation, forecasting, learning, Claude AI ================= */
+const L=(vi,en)=>lang==='en'?en:vi;
+const fmt1=n=>(Math.round(n*10)/10).toLocaleString(lang==='en'?'en-US':'vi-VN');
+const fmt0=n=>Math.round(n).toLocaleString(lang==='en'?'en-US':'vi-VN');
+
+/* ---- Claude runtime: real AI inside the Claude viewer, rule fallback elsewhere ---- */
+let AI=null, AIstate='wait', AIimg=false, AItools=false;
+function aiFlags(){const b=document.body;if(!b)return;b.classList.toggle('aion',AIstate==='on');b.classList.toggle('aiimg',AIstate==='on'&&AIimg);
+  document.querySelectorAll('[data-aibadge]').forEach(x=>{x.textContent=AIstate==='on'?L('AI thật · Claude','Live AI · Claude'):AIstate==='wait'?L('Đang kết nối AI…','Connecting AI…'):L('Chế độ ngoại tuyến · luật','Offline mode · rules');x.className='chip '+(AIstate==='on'?'s-ai':'')})}
+(async()=>{try{
+  if(typeof claude==='undefined'||!claude||!claude.use){AIstate='off';aiFlags();return}
+  const s=await claude.use('sample'); if(!s){AIstate='off';aiFlags();return}
+  AI=s;AIstate='on';
+  try{const l=await s.limits();AIimg=!!(l&&l.images);AItools=!!(l&&l.tools)}catch(e){}
+  aiFlags();
+}catch(e){AIstate='off';aiFlags()}})();
+function aiFail(e){const c=e&&e.code;
+  if(['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(c)){AIstate='off';aiFlags();return L('AI chưa được cho phép trong lần mở này. Đã chuyển sang chế độ luật.','AI is not allowed in this view. Switched to rule mode.')}
+  if(c==='rate_limited')return L('Đang quá nhiều yêu cầu, thử lại sau ít phút.','Too many requests, try again in a few minutes.');
+  if(c==='images_unavailable'){AIimg=false;aiFlags();return L('Lần mở này không gửi được ảnh cho AI.','This view cannot send images to AI.')}
+  if(c==='image_rejected')return L('Ảnh không đọc được, thử ảnh khác (JPG/PNG).','Image could not be read, try another (JPG/PNG).');
+  if(c==='invalid_json')return L('AI trả lời chưa đúng định dạng, bấm thử lại.','AI reply was not in the expected format, try again.');
+  if(c==='cancelled')return '';
+  return L('Mất kết nối tới AI, thử lại.','Lost connection to AI, try again.')}
+const md=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#+\s*/gm,'').replace(/^[-•]\s+/gm,'• ');
+
+/* ---- 1. YARD SLOT OPTIMISATION (real metres on the satellite map) ---- */
+const PDI_PT=[243,493], HZ=7;
+(()=>{const r2=mulberry32(20261007);V.forEach(v=>{const k=r2();
+  v.out=v.holds.length?25+Math.floor(k*20):v.due!=null?v.due:v.status==='Sẵn sàng'?2+Math.floor(k*16):v.status==='PPO'?3+Math.floor(k*6):v.status==='Bảo dưỡng'?6+Math.floor(k*12):7+Math.floor(k*14)})})();
+const needPdi=v=>['Nhập bãi','Chờ PDI','Đang PDI','PPO'].includes(v.status);
+const slotIds=z=>{const a=[];for(let r=1;r<=ZR;r++)for(let c=1;c<=ZC;c++)a.push(z+'-'+String(r).padStart(2,'0')+'-'+String(c).padStart(2,'0'));return a};
+const DCACHE={};
+function dists(id){if(DCACHE[id])return DCACHE[id];const g=slotGeom(id);const dg=routeOf(id).d;const dp=Math.abs(g.cy-g.ay)+Math.abs(g.cx-MAISLE)+Math.abs(g.ay-PDI_PT[1])+Math.abs(MAISLE-PDI_PT[0]);return DCACHE[id]={g:dg,p:dp}}
+function tripW(v){return {g:(v.out<=HZ&&!v.holds.length)?1:0,p:needPdi(v)?2:0}}
+function carCost(v,id){const w=tripW(v),d=dists(id);return w.g*d.g+w.p*d.p}
+function bestSlot(v,taken){let best=null,bc=1e12;for(const z of OEMS[v.oem].zones)for(const id of slotIds(z)){if((taken||slots)[id])continue;const w=tripW(v),d=dists(id);const c=(w.g||w.p)?carCost(v,id):-d.g*0.01;if(c<bc){bc=c;best=id}}return best}
+function intakePct(){ // if every car had been slotted by the optimiser at VIN scan (no moves)
+  let now=0,opt=0;
+  for(const z of 'ABCD'){const cars=V.filter(v=>v.slot[0]===z),free=new Set(slotIds(z));
+    const key=v=>{const w=tripW(v);return w.g*3+w.p*2+(w.g?1/(v.out+1):0)};
+    cars.sort((a,b)=>key(b)-key(a)||a.model.localeCompare(b.model));
+    for(const v of cars){const w=tripW(v);let best=null,bc=1e12;for(const id of free){const d=dists(id);const c=(w.g||w.p)?carCost(v,id):-d.g*0.01;if(c<bc){bc=c;best=id}}
+      now+=carCost(v,v.slot);opt+=carCost(v,best);free.delete(best)}}
+  return now?(now-opt)/now*100:0}
+function yardPlan(){
+  const cur={},occ={};V.forEach(v=>{cur[v.vin]=v.slot;occ[v.slot]=v});
+  const mv=(a,b)=>{const A=slotGeom(a),B=slotGeom(b);return Math.abs(A.cx-B.cx)+Math.abs(A.ay-B.ay)+Math.abs(A.cy-A.ay)+Math.abs(B.cy-B.ay)};
+  const IDS={};for(const o of Object.keys(OEMS))IDS[o]=OEMS[o].zones.flatMap(slotIds);
+  for(let it=0;it<400;it++){let best=null,bg=1;
+    for(const v of V){const s0=cur[v.vin],c0=carCost(v,s0);
+      for(const id of IDS[v.oem]){if(id===s0)continue;const o=occ[id];
+        if(!o){const g=c0-carCost(v,id)-mv(s0,id);if(g>bg){bg=g;best=[v,id,null]}}
+        else{const g=c0+carCost(o,id)-carCost(v,id)-carCost(o,s0)-2*mv(s0,id);if(g>bg){bg=g;best=[v,id,o]}}}}
+    if(!best)break;const [v,id,o]=best,s0=cur[v.vin];
+    if(o){cur[o.vin]=s0;occ[s0]=o}else delete occ[s0];cur[v.vin]=id;occ[id]=v}
+  let now=0,opt=0,moves=0,moveM=0;
+  V.forEach(v=>{now+=carCost(v,v.slot);opt+=carCost(v,cur[v.vin]);if(cur[v.vin]!==v.slot){moves++;moveM+=mv(v.slot,cur[v.vin])}});
+  const hrs=m=>m/167/60+m/80/60; // drive 10 km/h, walk back 4.8 km/h
+  const trips=V.reduce((a,v)=>{const w=tripW(v);return a+w.g+w.p},0);
+  const net=now-opt-moveM, perTrip=trips?net/trips:0, yearTrips=70000*3, yearH=hrs(perTrip*yearTrips);
+  return {plan:cur,now,opt,moves,moveM,hNow:hrs(now),hOpt:hrs(opt),pct:now?(now-opt)/now*100:0,netPct:now?net/now*100:0,trips,perTrip,yearH,yearCost:yearH*rs.cost/1000,moveH:hrs(moveM),intake:intakePct()};
+}
+let yp=null, ypPrev=null;
+function applyPlan(){if(!yp)return;ypPrev={};V.forEach(v=>ypPrev[v.vin]=v.slot);for(const k in slots)delete slots[k];V.forEach(v=>{v.slot=yp.plan[v.vin];slots[v.slot]=v});yp=null}
+function undoPlan(){if(!ypPrev)return;for(const k in slots)delete slots[k];V.forEach(v=>{v.slot=ypPrev[v.vin];slots[v.slot]=v});ypPrev=null}
+const OUTC=v=>v.holds.length?'#5B6168':v.out<=2?'#E5484D':v.out<=7?'#F2A33A':v.out<=14?'#F5D90A':'#4F9BEA';
+function optPanel(){
+  const r=yp;
+  return `<div class="panel" style="border-color:var(--accent)"><h3 style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${L('Xếp ô tối ưu','Slot optimiser')}</span><span class="chip s-ai">${L('Tối ưu thật','Real optimisation')}</span></h3>
+   <p class="hint" style="margin:0 0 8px">${L('Xe sắp giao đỗ gần cổng, xe chờ PDI/PPO gần xưởng, xe tồn lâu hoặc bị chặn đẩy vào sâu, cùng model đỗ liền nhau. Tính bằng mét thật trên ảnh vệ tinh.','Cars leaving soon park near the gate, cars awaiting PDI/PPO near the workshop, long-stay or held cars go deep, same models park together. Measured in real metres on the satellite map.')}</p>
+   ${r?`<div class="grid" style="grid-template-columns:1fr 1fr;gap:8px">
+     <div><div class="hint">${L('Quãng lái 7 ngày tới','Driving, next 7 days')}</div><div class="mono" style="font-size:18px;font-weight:600">${fmt1(r.now/1000)} → ${fmt1(r.opt/1000)} km</div><div class="hint" style="color:var(--ok)">−${fmt1(r.pct)}%</div></div>
+     <div><div class="hint">${L('Giờ công lái + đi bộ về','Driver + walk-back hours')}</div><div class="mono" style="font-size:18px;font-weight:600">${fmt1(r.hNow)} → ${fmt1(r.hOpt)} h</div><div class="hint">${L('cho','for')} ${r.trips} ${L('lượt chạy','trips')}</div></div>
+     <div><div class="hint">${L('Xe cần dời (chỉ dời khi có lãi)','Cars to re-slot (only if it pays)')}</div><div class="mono" style="font-size:18px;font-weight:600">${r.moves}</div><div class="hint">${fmt1(r.moveH)} h ${L('một lần, lãi ròng','one-off, net gain')} ${fmt1(r.netPct)}%</div></div>
+     <div><div class="hint">${L('Quy ra năm (~70.000 xe)','Per year (~70,000 cars)')}</div><div class="mono" style="font-size:18px;font-weight:600">${fmt0(r.yearH)} h</div><div class="hint">≈ ${fmt0(r.yearCost)} ${L('triệu đ','M VND')}</div></div></div>
+     <div class="row sec"><button class="btn acc" data-x="ypapply">${L('Áp dụng phương án','Apply plan')}</button><button class="btn" data-x="ypclear">${L('Bỏ','Discard')}</button></div>
+     <p class="hint" style="margin-bottom:0">${L(`Nếu mọi xe được xếp tối ưu ngay khi quét VIN nhập bãi: quãng lái giảm ${fmt1(r.intake)}% mà không phải dời xe nào. `,`If every car had been slotted by the optimiser at VIN scan: ${fmt1(r.intake)}% less driving with zero moves. `)}${L('Vạch vàng trên bản đồ: xe → ô mới. Xe mới nhập luôn được gợi ý ô tốt nhất ngay khi quét VIN, nên thường chỉ cần dời xe khi đổi kế hoạch giao.','Yellow lines on the map: car → new slot. New arrivals always get the best slot at VIN scan, so re-slotting is only needed when delivery plans change.')}</p>`
+   :`<div class="row"><button class="btn pri" data-x="ypcalc">${L('Tính phương án','Compute plan')}</button>${ypPrev?`<button class="btn" data-x="ypundo">${L('Hoàn tác lần áp dụng','Undo last apply')}</button>`:''}</div>${ypPrev?`<p class="hint" style="margin-bottom:0;color:var(--ok)">${L('Đã áp dụng. Lệnh dời xe đã gửi tới app lái xe theo thứ tự đi ít nhất.','Applied. Move orders sent to the driver app in shortest-walk order.')}</p>`:''}`}
+  </div>`;
+}
+
+/* ---- 4. STAFF FORECAST FROM THE VESSEL SCHEDULE ---- */
+const VSCHED=[
+  {ship:'Pacific Bloom V.2610',d:2,h:22,n:412},{ship:'Asian Crest V.2612',d:4,h:6,n:1480},{ship:'Morning Star V.2613',d:7,h:14,n:1620},
+  {ship:'Pacific Bloom V.2614',d:10,h:20,n:1350},{ship:'Grand Aurora V.2615',d:11,h:8,n:980}];
+let fcTarget=20;
+function staffForecast(){
+  const sim=roroSim(rs,true), perDrv=60/sim.cyc; // cars per driver-hour (optimised flow)
+  const S=[];for(let i=0;i<13*2;i++)S.push({drv:0,pdi:0,ships:[]}); // slots: day i → 2i (day 06:30-18:30), 2i+1 (night)
+  const shiftOf=t=>{const d=Math.floor(t/24),h=t-d*24;if(h<6.5)return 2*(d-1)+1;if(h<18.5)return 2*d;return 2*d+1};
+  const plan=VSCHED.map(v=>{
+    const start=v.d*24+v.h+2, T=Math.max(6,Math.min(fcTarget,v.n/ (rs.D*perDrv)*1.6)); // berth + 2h; target window
+    const need=Math.ceil(v.n/(perDrv*Math.min(fcTarget,T)));
+    const dur=v.n/(need*perDrv);
+    for(let t=start;t<start+dur;t+=1){const s=shiftOf(t);if(S[s]){S[s].drv=Math.max(S[s].drv,need);if(!S[s].ships.includes(v.ship))S[s].ships.push(v.ship)}}
+    // PDI: all imported cars, 0,53 h/car, spread over day shifts of the 5 days after discharge
+    const pdiH=v.n*0.53, days=5, dayStart=Math.floor((start+dur)/24)+1;
+    for(let k=0;k<days;k++){const s=2*(dayStart+k);if(S[s])S[s].pdi+=pdiH/days/(10*0.85)}
+    return {...v,start,dur,need};
+  });
+  const avD=auHead.yard, avDn=Math.round(auHead.yard*0.6), avP=auHead.pdi;
+  S.forEach((s,i)=>{s.avD=i%2?avDn:avD;s.avP=i%2?0:avP;s.pdi=Math.ceil(s.pdi);s.gapD=Math.max(0,s.drv-s.avD);s.gapP=Math.max(0,s.pdi-s.avP)});
+  return {S,plan,perDrv,sim};
+}
+function forecastPanel(){
+  const f=staffForecast(), S=f.S.slice(0,24);
+  const W=720,H=180,bw=W/S.length, mx=Math.max(10,...S.map(s=>Math.max(s.drv,s.pdi,s.avD)));
+  const y=v=>H-20-(v/mx)*(H-34);
+  let bars='';S.forEach((s,i)=>{const x=i*bw;
+    if(s.drv)bars+=`<rect x="${x+2}" y="${y(s.drv)}" width="${bw/2-2}" height="${H-20-y(s.drv)}" fill="${s.gapD?'var(--crit)':'var(--ok)'}" rx="1.5"><title>${L('Lái xe cần','Drivers needed')} ${s.drv}</title></rect>`+`<text x="${x+bw/4+1}" y="${y(s.drv)-3}" text-anchor="middle" style="font-size:9px;fill:var(--ink)">${s.drv}</text>`;
+    if(s.pdi)bars+=`<rect x="${x+bw/2}" y="${y(s.pdi)}" width="${bw/2-2}" height="${H-20-y(s.pdi)}" fill="${s.gapP?'var(--warn)':'var(--navy)'}" rx="1.5"><title>PDI ${s.pdi}</title></rect>`+`<text x="${x+bw*3/4-1}" y="${y(s.pdi)-3}" text-anchor="middle" style="font-size:9px;fill:var(--muted)">${s.pdi}</text>`;
+    bars+=`<line x1="${x+1}" x2="${x+bw-1}" y1="${y(s.avD)}" y2="${y(s.avD)}" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="3 2"/>`;
+    if(i%2===0)bars+=`<text x="${x+bw}" y="${H-5}" text-anchor="middle" style="font-size:9px;fill:var(--muted)">${dd(i/2)}</text>`});
+  const acts=[];f.S.forEach((s,i)=>{if(s.gapD)acts.push([i,'drv',s]);if(s.gapP)acts.push([i,'pdi',s])});
+  const sh=i=>`${dd(Math.floor(i/2))} ${i%2?L('ca đêm','night'):L('ca ngày','day')}`;
+  return `<div class="panel" style="border-color:var(--accent)"><h2 style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span>${L('Dự báo nhân lực theo lịch tàu','Manpower forecast from the vessel schedule')}</span><span class="chip s-ai">${L('Tự tính','Auto-computed')}</span></h2>
+   <p class="hint" style="margin-top:0">${L('Từ ETA tàu RoRo tại Tân Vũ, số xe và năng suất thực của vòng lái','From RoRo ETAs at Tan Vu, car counts and the measured driver cycle')} (${fmt1(f.sim.cyc)} ${L('phút/vòng','min/cycle')} → ${fmt1(f.perDrv)} ${L('xe/người/giờ','cars/person/h')}). ${L('Cột xanh/đỏ: lái xe cần; cột tím/cam: KTV PDI cần; vạch đứt: lái xe sẵn có.','Green/red bars: drivers needed; purple/orange: PDI technicians needed; dashed: drivers available.')}</p>
+   <div class="row" style="gap:10px;margin-bottom:6px"><label class="hint">${L('Mục tiêu giải phóng tàu tối đa','Max discharge window')} <input type="number" id="fct" min="6" max="48" value="${fcTarget}" style="width:60px"> ${L('giờ','h')}</label><button class="btn" data-x="fcrun">${L('Tính lại','Recalculate')}</button></div>
+   <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="${L('Biểu đồ nhân lực','Manpower chart')}">${bars}</svg>
+   <div class="grid g2 sec" style="gap:12px"><div class="tbl"><table><thead><tr><th>${L('Tàu','Vessel')}</th><th>ETA</th><th class="n">${L('Xe','Cars')}</th><th class="n">${L('Lái xe','Drivers')}</th><th class="n">${L('Giải phóng','Discharge')}</th></tr></thead><tbody>${f.plan.map(p=>`<tr><td>${p.ship}</td><td class="mono">${dd(p.d)} ${String(p.h).padStart(2,'0')}:00</td><td class="n mono">${fmt0(p.n)}</td><td class="n mono">${p.need}</td><td class="n mono">${fmt1(p.dur)} h</td></tr>`).join('')}</tbody></table></div>
+   <div><h3 style="margin-top:0">${L('Việc cần làm','Actions')}</h3>${acts.length?`<div class="alerts">${acts.slice(0,5).map(([i,k,s])=>`<div class="alert"><span class="bar" style="background:${k==='drv'?'var(--crit)':'var(--warn)'}"></span><div><b>${sh(i)}: ${k==='drv'?L(`thiếu ${s.gapD} lái xe`,`${s.gapD} drivers short`):L(`thiếu ${s.gapP} KTV PDI`,`${s.gapP} PDI technicians short`)}</b><p>${k==='drv'?L(`Cần ${s.drv}, có ${s.avD}. Đặt thời vụ trước 48 giờ qua Zalo, cấp QR theo ngày.`,`Need ${s.drv}, have ${s.avD}. Book casuals 48 h ahead via Zalo with day QR passes.`)+(s.ships.length>1?L(' Hai tàu chồng ca.',' Two vessels overlap.'):''):L(`Cần ${s.pdi}, có ${s.avP}. Tăng ca hoặc dời bớt PDI xe giao muộn sang ngày sau.`,`Need ${s.pdi}, have ${s.avP}. Add overtime or shift PDI of late-delivery cars to later days.`)}</p></div><span></span></div>`).join('')}</div>`:`<p class="hint">${L('Đủ người cho 12 ngày tới.','Fully staffed for the next 12 days.')}</p>`}</div></div>
+   <p class="hint" style="margin-bottom:0">${L('Lịch tàu là dữ liệu mẫu. Bản thật lấy ETA từ hãng tàu/cảng Tân Vũ và số xe từ shipping advice của OEM, tự cập nhật khi ETA đổi.','Vessel schedule is sample data. Live version pulls ETAs from the line/Tan Vu port and car counts from OEM shipping advice, updating when ETAs change.')}</p></div>`;
+}
+
+/* ---- 5. LEARNING: calibrate the RoRo model from recorded scan times ---- */
+const HIST=(()=>{const r3=mulberry32(4242);const g=(m,s)=>Math.max(0.2,m+(r3()+r3()+r3()-1.5)*s);
+  return ['V.2598','V.2600','V.2601','V.2603','V.2604','V.2605','V.2606','V.2607'].map((v,i)=>({v,n:1250+Math.floor(r3()*450),gate:g(3.4,1),park:g(4.6,1.4),wait:g(13.5-i*0.4,4),quay:g(2.3,.6)}))})();
+let CAL=null;
+const med=a=>{const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2};
+const pct=(a,p)=>{const s=[...a].sort((x,y)=>x-y);return s[Math.min(s.length-1,Math.floor(p*(s.length-1)+.5))]};
+function learnPanel(){
+  const K=[['gate',L('Kiểm tra tại cổng','Gate inspection')],['park',L('Tìm ô, đỗ xe','Find slot, park')],['wait',L('Chờ xe đưa đón','Wait for shuttle')],['quay',L('Nhận xe tại cầu tàu','Pick-up at quay')]];
+  const trend=k=>{const ys=HIST.map(h=>h[k]),n=ys.length,mx=(n-1)/2,my=ys.reduce((a,b)=>a+b,0)/n;let num=0,den=0;ys.forEach((y,i)=>{num+=(i-mx)*(y-my);den+=(i-mx)**2});return num/den};
+  return `<div class="panel" style="border-color:var(--accent)"><h2 style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span>${L('Học từ dữ liệu thực tế','Learning from recorded data')}</span><span class="chip ${CAL?'s-ok':'s-ai'}">${CAL?L('Mô hình đã hiệu chỉnh','Model calibrated'):L('Chưa hiệu chỉnh','Not calibrated')}</span></h2>
+   <p class="hint" style="margin-top:0">${L('Mỗi lượt quét VIN ở cầu tàu, cổng và ô đỗ ghi lại thời gian từng khâu. App lấy trung vị 8 tàu gần nhất thay cho số giả định, kèm độ dao động P80 và xu hướng.','Every VIN scan at the quay, gate and slot records step times. The app replaces assumptions with the median of the last 8 vessels, plus P80 spread and trend.')}</p>
+   <div class="tbl"><table><thead><tr><th>${L('Khâu (phút/xe)','Step (min/car)')}</th>${HIST.map(h=>`<th class="n">${h.v}</th>`).join('')}<th class="n">${L('Trung vị','Median')}</th><th class="n">P80</th><th class="n">${L('Xu hướng','Trend')}</th></tr></thead><tbody>
+   ${K.map(([k,n])=>{const a=HIST.map(h=>h[k]),t=trend(k);return `<tr><td>${n}</td>${a.map(x=>`<td class="n mono">${fmt1(x)}</td>`).join('')}<td class="n mono"><b>${fmt1(med(a))}</b></td><td class="n mono">${fmt1(pct(a,.8))}</td><td class="n mono" style="color:${t<-0.05?'var(--ok)':t>0.05?'var(--crit)':'var(--muted)'}">${t<-0.05?'↓':t>0.05?'↑':'→'} ${fmt1(Math.abs(t))}</td></tr>`}).join('')}
+   </tbody></table></div>
+   <div class="row sec"><button class="btn ${CAL?'':'pri'}" data-x="learn">${CAL?L('Bỏ hiệu chỉnh','Reset calibration'):L('Hiệu chỉnh mô phỏng từ dữ liệu','Calibrate simulator from data')}</button>${CAL?`<span class="hint">${L('Mô phỏng phía trên đang dùng số đo thực: cổng','Simulator above now uses measured values: gate')} ${fmt1(CAL.gate)}, ${L('đỗ','park')} ${fmt1(CAL.park)}, ${L('chờ','wait')} ${fmt1(CAL.wait)}, ${L('cầu tàu','quay')} ${fmt1(CAL.quay)} ${L('phút','min')}.</span>`:''}</div>
+   <p class="hint" style="margin-bottom:0">${L('Thời gian chờ xe đưa đón đang giảm dần qua các tàu: dấu hiệu điều xe đã tốt hơn. Số liệu 8 tàu là mẫu; khi chạy thật app tự ghi.','Shuttle wait is falling vessel by vessel: dispatch is improving. The 8-vessel data is sample; the live app records it automatically.')}</p></div>`;
+}
+
+/* ---- 2. CONTROL TOWER ASSISTANT: Claude with page tools over live app data ---- */
+let chatTurns=[], aiBusy=false;
+function snapshot(){
+  const by=o=>V.filter(v=>v.oem===o), cnt=(a,f)=>a.filter(f).length;
+  const lines=[`Ngày: ${dd(0)}/2026. Đơn vị: HPS – Công ty CP Dịch vụ Cảng Hải Phòng, Lô KB1-1 KCN Nam Đình Vũ. Bãi xe nhận xe RoRo từ cảng Tân Vũ (~7 km đường bộ), kho lạnh, tàu lai, hàng siêu trường siêu trọng.`];
+  for(const o of Object.keys(OEMS)){const a=by(o);lines.push(`${o} (${OEMS[o].name}, khu ${OEMS[o].zones.join('/')}): tồn ${a.length}; `+Object.keys(ST).map(s=>`${s} ${cnt(a,v=>v.status===s)}`).join(', ')+`; bị chặn ${cnt(a,v=>v.holds.length)}; >30 ngày ${cnt(a,v=>v.arr>30)}; xuất trong 7 ngày ${cnt(a,v=>v.out<=7&&!v.holds.length)}.`)}
+  lines.push(`Sức chứa sơ đồ: 4 khu × ${ZR*ZC} ô. Xe đến hạn bảo dưỡng tồn: ${V.filter(mDue).length}. Lệnh giao hết hạn hôm nay: ${V.filter(v=>v.due===0).length}.`);
+  ROOMS.forEach(r=>{const sl=(r.s[23]-r.s[19])/4;lines.push(`${r.k}: hiện ${r.now}°C, cài ${r.sp}°C, xu hướng ${sl.toFixed(2)}°C/giờ (4 giờ qua).`)});
+  lines.push('Tờ khai TNTX: '+TNTX.map(t=>`${t[0]} ${t[1]} ${t[2]} ${t[3]} pallet, còn ${t[5]} ngày, ${t[6]}, đi ${t[7]}`).join('; '));
+  lines.push('Lịch tàu RoRo sắp tới: '+VSCHED.map(v=>`${v.ship} ETA ${dd(v.d)} ${v.h}:00, ${v.n} xe`).join('; '));
+  lines.push('Lai dắt hôm nay: '+MOVES.map(m=>`${m.t} ${m.ship} ${m.tugs&&m.tugs.length?'đã có '+m.tugs.join('+'):'chưa phân công'}`).join('; '));
+  lines.push('Nhân sự: '+STAFF.length+' người, đã chấm vào '+STAFF.filter(s=>s.in).length+'; ≥12 giờ: '+STAFF.filter(s=>s.h>=12).map(s=>s.n).join(', ')+'; gần trần OT 40h: '+STAFF.filter(s=>s.ot>=36).map(s=>s.n+' '+s.ot+'h').join(', ')+'.');
+  lines.push('Dự án siêu trường: '+PROJ.map(p=>`${p.c} ${p.n}`).join('; '));
+  return lines.join('\n');
+}
+const AITOOLS=[
+ {name:'search_vehicles',description:'Find cars in the yard. Filters are optional. Returns up to `limit` cars with vin, oem, model, slot, status, days_in_yard, days_to_exit, holds, distance_to_gate_m.',
+  inputSchema:{type:'object',properties:{oem:{type:'string',enum:['TMV','MMV','FORD']},status:{type:'string',description:'Nhập bãi | Chờ PDI | Đang PDI | PPO | Bảo dưỡng | Sẵn sàng'},model:{type:'string'},held:{type:'boolean'},min_days:{type:'number'},max_days_to_exit:{type:'number'},limit:{type:'number'}}},
+  execute(i){let a=V.filter(v=>(!i.oem||v.oem===i.oem)&&(!i.status||v.status===String(i.status))&&(!i.model||v.model.toLowerCase().includes(String(i.model).toLowerCase()))&&(i.held==null||(!!v.holds.length)===!!i.held)&&(i.min_days==null||v.arr>=+i.min_days)&&(i.max_days_to_exit==null||v.out<=+i.max_days_to_exit));
+   return {total:a.length,cars:a.slice(0,Math.min(25,+i.limit||12)).map(v=>({vin:v.vin,oem:v.oem,model:v.model,slot:v.slot,status:v.status,days_in_yard:v.arr,days_to_exit:v.out,holds:v.holds,distance_to_gate_m:Math.round(dists(v.slot).g)}))}}},
+ {name:'get_vehicle',description:'Full record of one car by any part of its VIN (5+ chars): slot, status, holds, damages, PPO, maintenance, walking distance from gate.',
+  inputSchema:{type:'object',properties:{vin:{type:'string'}},required:['vin']},
+  execute(i){const q=String(i.vin||'').toUpperCase();const v=V.find(x=>x.vin.includes(q));if(!v)throw new Error('VIN not found');return {...v,damages:v.damages.map(d=>({area:d.area[1],type:d.type[1],sev:d.sev,point:d.point,fixed:d.fixed})),maintenance_due:mDue(v),distance_to_gate_m:Math.round(dists(v.slot).g),distance_to_pdi_m:Math.round(dists(v.slot).p)}}},
+ {name:'optimize_yard',description:'Run the slot optimiser on the current yard (does not apply it). Returns km driven in next 7 days now vs optimised, hours saved, cars to move, yearly hours and cost saved.',
+  execute(){const r=yardPlan();return {km_now:+(r.now/1000).toFixed(2),km_opt:+(r.opt/1000).toFixed(2),saving_pct:+r.pct.toFixed(1),hours_now:+r.hNow.toFixed(1),hours_opt:+r.hOpt.toFixed(1),cars_to_move:r.moves,year_hours_saved:Math.round(r.yearH),year_cost_saved_mVND:Math.round(r.yearCost)}}},
+ {name:'staff_forecast',description:'Manpower needed per shift for the next 12 days from the RoRo vessel schedule: drivers and PDI technicians needed vs available, and shortages.',
+  execute(){const f=staffForecast();return {cars_per_driver_hour:+f.perDrv.toFixed(2),vessels:f.plan.map(p=>({ship:p.ship,eta:dd(p.d)+' '+p.h+':00',cars:p.n,drivers:p.need,discharge_h:+p.dur.toFixed(1)})),shortages:f.S.map((s,i)=>({shift:dd(Math.floor(i/2))+(i%2?' night':' day'),drivers_need:s.drv,drivers_have:s.avD,pdi_need:s.pdi,pdi_have:s.avP})).filter(s=>s.drivers_need>s.drivers_have||s.pdi_need>s.pdi_have)}}},
+ {name:'cold_room_trend',description:'24 hourly temperatures of a cold room (Kho 7/8/9/10) with linear-regression slope over the last 6 h and hours until -18°C if warming.',
+  inputSchema:{type:'object',properties:{room:{type:'string'}},required:['room']},
+  execute(i){const r=ROOMS.find(x=>x.k.replace(/\s/g,'').toLowerCase()===String(i.room||'').replace(/\s/g,'').toLowerCase())||ROOMS.find(x=>String(i.room||'').includes(x.k.split(' ')[1]));if(!r)throw new Error('room not found');const ys=r.s.slice(-6),n=6,mx=2.5,my=ys.reduce((a,b)=>a+b,0)/n;let nu=0,de=0;ys.forEach((y,k)=>{nu+=(k-mx)*(y-my);de+=(k-mx)**2});const sl=nu/de;return {room:r.k,setpoint:r.sp,now:r.now,hourly:r.s,slope_c_per_h:+sl.toFixed(2),hours_to_minus18:sl>0.05&&r.sp<-18?+((-18-r.now)/sl).toFixed(1):null}}}
+];
+function aiRules(){return L(
+`Bạn là Trợ lý vận hành của HPS (Công ty CP Dịch vụ Cảng Hải Phòng). Người hỏi là quản lý cảng. Trả lời bằng tiếng Việt, ngắn gọn (tối đa khoảng 120 chữ), dùng đúng thuật ngữ cảng/logistics, số liệu lấy từ DỮ LIỆU hoặc công cụ, tuyệt đối không bịa. Nếu dữ liệu không có thì nói rõ. Khi phù hợp, kết thúc bằng 1 việc cần làm cụ thể. Không dùng bảng, không dùng tiêu đề.`,
+`You are the operations assistant of HPS (Hai Phong Port Services JSC). The user is a port manager. Answer in English, briefly (about 120 words max), using port/logistics terms. Use only figures from the DATA or tools, never invent. If the data does not have it, say so. When useful, end with one concrete action. No tables, no headings. Vietnamese status names in data: Nhập bãi=received, Chờ PDI=awaiting PDI, Đang PDI=in PDI, Bảo dưỡng=maintenance, Sẵn sàng=ready.`)+'\n\nDỮ LIỆU / DATA:\n'+snapshot()}
+async function aiAsk(q){
+  const c=document.getElementById('chat');if(!c||aiBusy)return;aiBusy=true;
+  c.insertAdjacentHTML('beforeend',`<div class="msg u">${esc(q)}</div><div class="msg a ai" style="white-space:pre-wrap"><span class="hint">${L('Đang suy nghĩ…','Thinking…')}</span></div>`);
+  const b=c.lastElementChild;c.scrollTop=c.scrollHeight;
+  chatTurns.push({role:'user',content:q});if(chatTurns.length>8)chatTurns=chatTurns.slice(-8);
+  while(chatTurns.length&&chatTurns[0].role!=='user')chatTurns.shift();
+  const input=[{role:'user',content:aiRules()},...chatTurns];
+  const opt={cache:false,modelTier:'quick',onText:({text})=>{b.innerHTML=md(text);c.scrollTop=c.scrollHeight}};
+  if(AItools){delete opt.cache;opt.tools=AITOOLS.map(t=>({...t,execute:(i)=>{b.innerHTML=`<span class="hint">${L('Đang tra dữ liệu','Querying data')}: ${t.name}…</span>`;return t.execute(i||{})}}))}
+  try{const r=await AI(input,opt);b.innerHTML=md(r.text);chatTurns.push({role:'assistant',content:r.text})}
+  catch(e){const m=aiFail(e);b.innerHTML=(e.text?md(e.text)+'<br>':'')+`<span class="hint">${esc(m)}</span>`;chatTurns.pop();if(AIstate!=='on')b.insertAdjacentHTML('afterend',`<div class="msg a">${esc(lang==='en'?answerEN(q):answer(q))}</div>`)}
+  aiBusy=false;c.scrollTop=c.scrollHeight;
+}
+
+/* ---- 3. VISION: damage photos and TNTX declarations ---- */
+let dmgAI=null, tkAI=null, tkMsg='';
+function fileToURL(f){return URL.createObjectURL(f)}
+async function aiDamage(file){
+  const box=document.getElementById('aisug');if(!box)return;const url=fileToURL(file);
+  box.innerHTML=`<div class="card" style="border-color:var(--accent)"><span class="chip s-ai">Claude</span> <span class="hint">${L('Đang phân tích ảnh…','Analysing photo…')}</span></div>`;
+  const prompt=`Ảnh chụp một xe ô tô mới tại bãi cảng. Tìm mọi hư hỏng nhìn thấy (xước, móp, nứt/vỡ, bong/rỗ sơn, bẩn/ố sáp).
+Mã vùng: ${AREAS.map(a=>a[0]+'='+a[1]).join('; ')}.
+Mã loại: ${DTYPES.map(a=>a[0]+'='+a[1]).join('; ')}.
+Mức độ theo kích thước: 1 dưới 2 cm, 2 từ 2–5 cm, 3 từ 5–15 cm, 4 từ 15–30 cm, 5 trên 30 cm.
+Chỉ trả JSON: {"vehicle":true|false,"items":[{"area":"06","type":"01","sev":2,"size_cm":4,"note":"mô tả ngắn tiếng Việt","box":[x,y,w,h]}],"summary":"1 câu tiếng Việt"} trong đó box là tọa độ chuẩn hóa 0–1 so với ảnh. Không thấy hư hỏng thì items rỗng.`;
+  try{const r=await AI.json(prompt,{images:[file],modelTier:'default'});dmgAI={url,r:r||{items:[]}}}
+  catch(e){dmgAI=null;box.innerHTML=`<div class="card"><span class="hint">${esc(aiFail(e))}</span></div>`;return}
+  drawDamageAI();
+}
+function drawDamageAI(){const box=document.getElementById('aisug');if(!box||!dmgAI)return;const {url,r}=dmgAI;const it=Array.isArray(r.items)?r.items:[];
+  const nm=(list,c)=>{const x=list.find(a=>a[0]===String(c).padStart(2,'0'));return x?x[1]:c};
+  box.innerHTML=`<div class="card" style="border-color:var(--accent)"><span class="chip s-ai">Claude · ${L('AI thật','live AI')}</span>
+   <div style="position:relative;margin-top:6px"><img src="${url}" alt="" style="width:100%;border-radius:6px;display:block">${it.map((d,k)=>Array.isArray(d.box)&&d.box.length===4?`<div style="position:absolute;left:${d.box[0]*100}%;top:${d.box[1]*100}%;width:${d.box[2]*100}%;height:${d.box[3]*100}%;border:2px solid #FF4D4D;border-radius:4px"><span style="position:absolute;top:-18px;left:0;background:#FF4D4D;color:#fff;font-size:11px;padding:0 4px;border-radius:3px">${k+1}</span></div>`:'').join('')}</div>
+   ${r.vehicle===false?`<p class="hint">${L('Ảnh không giống ảnh xe.','Photo does not look like a car.')}</p>`:''}
+   <p style="margin:6px 0">${esc(r.summary||'')}</p>
+   ${it.length?`<div class="tbl"><table><tbody>${it.map((d,k)=>`<tr><td><b>${k+1}</b></td><td class="mono">${String(d.area).padStart(2,'0')}-${String(d.type).padStart(2,'0')}-${d.sev}</td><td>${esc(nm(AREAS,d.area))} · ${esc(nm(DTYPES,d.type))}${d.size_cm?` · ~${d.size_cm} cm`:''}<div class="hint">${esc(d.note||'')}</div></td></tr>`).join('')}</tbody></table></div>
+   <button class="btn acc sec" data-x="dmgsave">${L('Ghi tất cả vào hồ sơ VIN','Log all to VIN record')}</button>`:`<p class="hint">${L('Không thấy hư hỏng.','No damage found.')}</p>`}</div>`}
+async function aiTK(file){
+  tkAI={busy:true,url:fileToURL(file)};tkMsg='';render();
+  const prompt=`Ảnh là tờ khai hải quan (thường là hàng tạm nhập tái xuất, đông lạnh) của Việt Nam. Đọc và chỉ trả JSON:
+{"so_to_khai":"","ma_loai_hinh":"","ngay_dang_ky":"dd/mm/yyyy","chu_hang":"","mat_hang":"","so_luong":0,"don_vi":"","so_kien_pallet":0,"cua_khau_du_kien":"","han_tai_xuat":"dd/mm/yyyy hoặc null","ghi_chu":"điểm nào đọc không chắc"}
+Trường nào không có trong ảnh thì để null. Không đoán.`;
+  try{const r=await AI.json(prompt,{images:[file],modelTier:'default'});tkAI={url:tkAI.url,r:r||{}}}
+  catch(e){tkAI=null;tkMsg=aiFail(e)}
+  render();
+}
+const pDate=s=>{const m=String(s||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);return m?new Date(+m[3],+m[2]-1,+m[1]):null};
+function tkDays(r){const h=pDate(r.han_tai_xuat);if(h)return Math.round((h-TODAY)/864e5);const d=pDate(r.ngay_dang_ky);return d?Math.round((d.getTime()+60*864e5-TODAY)/864e5):null}
+function tkPanel(){
+  const r=tkAI&&tkAI.r, days=r?tkDays(r):null;
+  return `<div class="panel sec" style="border-color:var(--accent)"><h2 style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span>${L('AI đọc tờ khai TNTX','AI reads TNTX declarations')}</span><span class="chip" data-aibadge>…</span></h2>
+   <div class="ai-only"><p class="hint" style="margin-top:0">${L('Chụp hoặc tải ảnh tờ khai. AI đọc số tờ khai, chủ hàng, mặt hàng, số lượng, hạn tái xuất và tự đếm ngược.','Snap or upload the declaration. AI reads the number, owner, goods, quantity and re-export deadline, then counts down.')}</p>
+    <label class="btn pri ai-img-only" style="display:inline-block;cursor:pointer">${L('Chọn ảnh tờ khai','Choose declaration photo')}<input type="file" id="tkimg" accept="image/jpeg,image/png,image/webp" style="display:none"></label>
+    <span class="hint ai-noimg">${L('Lần mở này chưa cho phép gửi ảnh cho AI.','This view does not allow sending images to AI.')}</span></div>
+   <p class="hint ai-off">${L('Tính năng dùng AI thật khi mở bản demo trên Claude. Bản cài qua Zalo cần máy chủ AI riêng khi triển khai.','Uses live AI when the demo is opened in Claude. The Zalo install needs its own AI server in production.')}</p>
+   ${tkMsg?`<p class="hint" style="color:var(--crit)">${esc(tkMsg)}</p>`:''}
+   ${tkAI&&tkAI.busy?`<p class="hint">${L('Đang đọc tờ khai…','Reading declaration…')}</p>`:''}
+   ${r?`<div class="grid g2" style="gap:12px;margin-top:8px"><img src="${tkAI.url}" alt="" style="width:100%;max-height:320px;object-fit:contain;border:1px solid var(--line);border-radius:6px">
+    <div class="tbl"><table><tbody>${[['Số tờ khai','so_to_khai'],['Loại hình','ma_loai_hinh'],['Ngày đăng ký','ngay_dang_ky'],['Chủ hàng','chu_hang'],['Mặt hàng','mat_hang'],['Số lượng','so_luong'],['Đơn vị','don_vi'],['Kiện / pallet','so_kien_pallet'],['Cửa khẩu','cua_khau_du_kien'],['Hạn tái xuất','han_tai_xuat']].map(([n,k])=>`<tr><td class="hint">${n}</td><td>${r[k]==null||r[k]===''?'<span class="hint">—</span>':esc(r[k])}</td></tr>`).join('')}
+     <tr><td class="hint">${L('Còn lại','Remaining')}</td><td>${days==null?'—':expChip(days)}${!pDate(r.han_tai_xuat)&&days!=null?`<div class="hint">${L('Tính 60 ngày từ ngày đăng ký (NĐ 69/2018, gia hạn 1 lần ≤ 30 ngày). Cần đối chiếu quy định hiện hành.','60 days from registration (Decree 69/2018, one extension ≤ 30 days). Check current rules.')}</div>`:''}</td></tr></tbody></table>
+     ${r.ghi_chu?`<p class="hint">${L('AI lưu ý','AI note')}: ${esc(r.ghi_chu)}</p>`:''}
+     <div class="row"><button class="btn acc" data-x="tkadd">${L('Thêm vào danh sách TNTX','Add to TNTX list')}</button><button class="btn" data-x="tkclr">${L('Bỏ','Discard')}</button></div></div></div>`:''}
+  </div>`;
+}
+
+/* ---- shared click handler for the smart layer ---- */
+document.addEventListener('click',e=>{const t=e.target.closest('[data-x]');if(!t)return;const a=t.dataset.x;
+  if(a==='ypcalc'){yp=yardPlan();render();return}
+  if(a==='ypclear'){yp=null;render();return}
+  if(a==='ypapply'){applyPlan();render();return}
+  if(a==='ypundo'){undoPlan();render();return}
+  if(a==='mcol'){mapS.color=mapS.color==='out'?'st':'out';render();return}
+  if(a==='fcrun'){const v=parseFloat((document.getElementById('fct')||{}).value);if(v>=6&&v<=48)fcTarget=v;render();return}
+  if(a==='learn'){CAL=CAL?null:{gate:med(HIST.map(h=>h.gate)),park:med(HIST.map(h=>h.park)),wait:med(HIST.map(h=>h.wait)),quay:med(HIST.map(h=>h.quay))};render();return}
+  if(a==='dmgsave'&&dmgAI){const p=(document.getElementById('dp')||{}).value||POINTS[1];(dmgAI.r.items||[]).forEach(d=>dlog.unshift({a:String(d.area).padStart(2,'0'),t:String(d.type).padStart(2,'0'),s:String(d.sev),p}));dmgAI=null;render();return}
+  if(a==='tkadd'&&tkAI&&tkAI.r){const r=tkAI.r;TNTX.unshift(['…'+String(r.so_to_khai||'????').slice(-4),r.chu_hang||'—',r.mat_hang||'—',+r.so_kien_pallet||0,r.ngay_dang_ky?String(r.ngay_dang_ky).slice(0,5):dd(0),tkDays(r)??60,'Chờ kiểm dịch',r.cua_khau_du_kien||'—']);tkAI=null;tkMsg=L('Đã thêm. Tem lô và đếm ngược hạn tái xuất được tạo tự động.','Added. Lot label and re-export countdown created automatically.');render();return}
+  if(a==='tkclr'){tkAI=null;tkMsg='';render();return}
+});
+document.addEventListener('change',e=>{
+  if(e.target.id==='tkimg'&&e.target.files[0]&&AI)aiTK(e.target.files[0]);
+});
+
 const VIEWS={auto,fin,tug,oog,tower,yard,map:mapv,damage,wo,gate,cold,hr,bill,field,mods,arch};
-function render(){renderNav();document.getElementById('main').innerHTML=VIEWS[cur]();bindView();document.documentElement.lang=lang;document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));translateDOM(document.querySelector('.app'));}
+function render(){renderNav();document.getElementById('main').innerHTML=VIEWS[cur]();bindView();document.documentElement.lang=lang;document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));translateDOM(document.querySelector('.app'));aiFlags();}
 function go(id){if(!VIEWS[id]||!enabled[id])id='tower';cur=id;try{history.replaceState(null,'','#'+id)}catch(e){}document.getElementById('ov').innerHTML='';render();window.scrollTo(0,0)}
 
 
@@ -1109,7 +1370,7 @@ const YARD_BG='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgwKCA
 const MCOL={'Nhập bãi':'#4F9BEA','Chờ PDI':'#C9CED3','Đang PDI':'#8E7CF0','PPO':'#E07BD0','Bảo dưỡng':'#F2A33A','Sẵn sàng':'#3FBF74'};
 const GATE=[198,562],MAISLE=198;
 const MAPFIT=[-30,95,390,320];
-const mapS={vb:[...MAPFIT],sel:null,gps:false,f:'',res:[],q:''};
+const mapS={color:'st',vb:[...MAPFIT],sel:null,gps:false,f:'',res:[],q:''};
 function slotGeom(id){const [z,r,c]=id.split('-');const [x0,y0]=ZPOS[z];const x=x0+(+c-1)*MSW,y=y0+(ZR-(+r))*(MSD+MAI);return {x,y,cx:x+MSW/2,cy:y+MSD/2,ay:y+MSD+MAI/2}}
 function routeOf(id){const g=slotGeom(id);const pts=[GATE,[MAISLE,g.ay],[g.cx,g.ay],[g.cx,g.cy]];let d=0;for(let i=1;i<pts.length;i++)d+=Math.abs(pts[i][0]-pts[i-1][0])+Math.abs(pts[i][1]-pts[i-1][1]);return {pts,d}}
 function focusSlot(id){const g=slotGeom(id);mapS.vb=[g.cx-38,g.cy-30.4,76,60.8]}
@@ -1128,7 +1389,8 @@ function mapv(){
     s+=`<text class="zl" x="${x0+MZW/2}" y="${y0-2}">KHU ${z} · ${zo}</text>`;
     for(let r=1;r<=ZR;r++){const g=slotGeom(z+'-'+String(r).padStart(2,'0')+'-01');s+=`<text class="rl" x="${x0-1.2}" y="${g.cy+.8}">${String(r).padStart(2,'0')}</text><rect x="${x0-3.6}" y="${g.y+MSD+1.2}" width="2.4" height="2.4" fill="#fff"/><path d="M${x0-3.3} ${g.y+MSD+1.5}h.8v.8h-.8zM${x0-2.1} ${g.y+MSD+2.7}h.8v.8h-.8z" fill="#111"/>`;
       for(let c=1;c<=ZC;c++){const id=z+'-'+String(r).padStart(2,'0')+'-'+String(c).padStart(2,'0');const gg=slotGeom(id);const v=slots[id];
-        s+=`<rect class="ms${v&&v.holds.length?' mh':''}" x="${(gg.x+.15).toFixed(2)}" y="${(gg.y+.15).toFixed(2)}" width="${MSW-.3}" height="${MSD-.3}" rx=".3" fill="${v?MCOL[v.status]:'none'}" opacity="${v&&!show(v)?.18:1}" ${v?`data-msel="${v.vin}"`:''}><title>${id}${v?' · '+v.vin.slice(-8)+' · '+v.model+' · '+v.status:' · trống'}</title></rect><text class="slab" x="${gg.cx}" y="${gg.cy+.5}">${c}</text>`}}}
+        s+=`<rect class="ms${v&&v.holds.length?' mh':''}" x="${(gg.x+.15).toFixed(2)}" y="${(gg.y+.15).toFixed(2)}" width="${MSW-.3}" height="${MSD-.3}" rx=".3" fill="${v?(mapS.color==='out'?OUTC(v):MCOL[v.status]):'none'}" opacity="${v&&!show(v)?.18:1}" ${v?`data-msel="${v.vin}"`:''}><title>${id}${v?' · '+v.vin.slice(-8)+' · '+v.model+' · '+v.status:' · trống'}</title></rect><text class="slab" x="${gg.cx}" y="${gg.cy+.5}">${c}</text>`}}}
+  if(yp){V.forEach(v=>{const n=yp.plan[v.vin];if(n&&n!==v.slot){const a=slotGeom(v.slot),b=slotGeom(n);s+=`<line x1="${a.cx}" y1="${a.cy}" x2="${b.cx}" y2="${b.cy}" stroke="#F5C21B" stroke-width=".45" opacity=".85"/><circle cx="${b.cx}" cy="${b.cy}" r=".7" fill="#F5C21B"/>`}})}
   // selection + route + gps
   let side='';
   if(sel){const g=slotGeom(sel.slot),rt=routeOf(sel.slot);
@@ -1155,8 +1417,9 @@ function mapv(){
      ${mapS.res.length>1?`<div class="tbl sec"><table><tbody>${mapS.res.slice(0,6).map(v=>`<tr class="click" data-map="${v.vin}"><td class="vin">${hl(v.vin,mapS.q)}</td><td class="mono">${v.slot}</td></tr>`).join('')}</tbody></table></div>`:''}
      ${mapS.q&&!mapS.res.length?'<p class="hint">Không tìm thấy VIN này trong bãi.</p>':''}</div>
     ${side}
+    ${optPanel()}
     <div class="panel"><h3>Lọc</h3><div class="row">${F.map(([k,n])=>`<button class="chip" data-mf="${k}" style="${mapS.f===k?'background:var(--ink);color:var(--surface);border-color:var(--ink)':''}">${n}</button>`).join('')}</div>
-     <div class="legend sec">${Object.entries(MCOL).map(([k,c])=>`<span><i style="background:${c}"></i>${k}</span>`).join('')}<span><i style="outline:2px solid #FF4D4D;outline-offset:-2px"></i>Cờ chặn</span></div>
+     <div class="row sec"><button class="btn" data-x="mcol">${mapS.color==='out'?L('Tô màu theo trạng thái','Colour by status'):L('Tô màu theo hạn xuất','Colour by exit date')}</button></div><div class="legend sec">${mapS.color==='out'?[['#E5484D',L('Xuất ≤ 2 ngày','Exit ≤ 2 days')],['#F2A33A','≤ 7 '+L('ngày','days')],['#F5D90A','≤ 14 '+L('ngày','days')],['#4F9BEA','> 14 '+L('ngày','days')],['#5B6168',L('Bị chặn','On hold')]].map(([c,k])=>`<span><i style="background:${c}"></i>${k}</span>`).join(''):Object.entries(MCOL).map(([k,c])=>`<span><i style="background:${c}"></i>${k}</span>`).join('')}<span><i style="outline:2px solid #FF4D4D;outline-offset:-2px"></i>Cờ chặn</span></div>
      <h3 class="sec">Lấp đầy</h3>${'ABCD'.split('').map(z=>`<div class="row" style="justify-content:space-between;font-size:12.5px"><span>Khu ${z}</span><span class="mono">${occ(z)}/${ZR*ZC}</span></div><div class="meter"><span style="width:${occ(z)/(ZR*ZC)*100}%;background:${occ(z)/(ZR*ZC)>.9?'var(--warn)':'var(--ok)'}"></span></div>`).join('')}
      <p class="hint">Ô vuông trắng ở đầu mỗi dãy là cột biển QR. Lái xe quét VIN rồi quét QR đầu dãy để xác nhận vị trí.</p></div>
    </div></div>`;
@@ -1557,6 +1820,7 @@ Object.assign(EN,{"Lô KB1-1, KCN Nam Đình Vũ, Đông Hải, Hải Phòng (20
 Object.assign(EN,{"Nam Hải Đình Vũ":"Nam Hai Dinh Vu","Tọa độ thật theo Google Maps, đúng tỷ lệ; quy mô RoRo theo báo chí ngành. Khoảng cách đường bộ là ước tính.":"Real Google Maps coordinates, to scale; RoRo volumes from industry press. Road distance is estimated."});
 Object.assign(EN,{"BÃI XE 1": "YARD 1", "BÃI XE 2 (dự phòng)": "YARD 2 (overflow)", "Bãi container & reefer": "Container & reefer yard", "Kho phía Nam": "South warehouses", "MỞ RỘNG": "EXTENSION", "Văn phòng HPS": "HPS office", "Đường trục KCN Nam Đình Vũ": "Nam Dinh Vu IP main road", "Ảnh vệ tinh thật Lô KB1-1 Nam Đình Vũ © Google · đúng tỷ lệ 1:1 m · chức năng từng khu là giả định, HPS xác nhận để chốt": "Real satellite image of Lot KB1-1 Nam Dinh Vu © Google · true 1:1 m scale · area functions are assumed, to be confirmed by HPS", "← Tân Vũ ~7 km": "← Tan Vu ~7 km", "↑ Cảng Nam Đình Vũ ~1 km": "↑ Nam Dinh Vu Port ~1 km", "Kho CFS 1": "CFS warehouse 1", "Kho CFS 2": "CFS warehouse 2", "Kho lạnh · Dãy 1": "Cold store · Block 1", "Kho lạnh · Dãy 2": "Cold store · Block 2", "Rửa xe": "Car wash"});
 Object.assign(EN,{"Ảnh vệ tinh Lô KB1-1 · © Google":"Satellite image Lot KB1-1 · © Google","Mở bản đồ bãi →":"Open yard map →"});
+Object.assign(EN,{"Xe Ford nào tồn quá 30 ngày?": "Which Ford cars have been in the yard over 30 days?", "Xếp lại bãi tiết kiệm được bao nhiêu?": "How much would re-slotting the yard save?", "Số tờ khai": "Declaration no.", "Loại hình": "Type code", "Ngày đăng ký": "Registered", "Chủ hàng": "Owner", "Mặt hàng": "Goods", "Số lượng": "Quantity", "Đơn vị": "Unit", "Kiện / pallet": "Packages / pallets", "Cửa khẩu": "Border gate", "Hạn tái xuất": "Re-export deadline", "Chờ kiểm dịch": "Awaiting quarantine"});
 function trS(t){
   if(!t)return t; if(EN[t]!==undefined)return EN[t];
   if(t.startsWith('· '))return '· '+trS(t.slice(2));
@@ -1604,7 +1868,7 @@ function answer(q){
   if(/tàu|nhân lực|người/.test(s))return 'Tàu V.2610 ETA 03/10 22:00, 412 xe. Với năng suất 7,5 xe/lái xe/giờ và mục tiêu dỡ xong trong 4 giờ, cần 14 lái xe, 4 kiểm đếm, 2 QC. Hiện đủ 11 người có B2 trong ca đêm, cần huy động thêm 3 thời vụ.';
   return 'Tôi chưa hiểu câu này. Thử hỏi theo VIN, tên OEM, kho lạnh, bảo dưỡng hoặc tàu sắp tới.';
 }
-function ask(q){if(!q.trim())return;const c=document.getElementById('chat');c.insertAdjacentHTML('beforeend',`<div class="msg u">${esc(lang==='en'?trS(q):q)}</div><div class="msg a">${esc(lang==='en'?answerEN(q):answer(q))}</div>`);c.scrollTop=c.scrollHeight}
+function ask(q){if(!q.trim())return;if(AIstate==='on'&&AI){aiAsk(q);return}const c=document.getElementById('chat');c.insertAdjacentHTML('beforeend',`<div class="msg u">${esc(lang==='en'?trS(q):q)}</div><div class="msg a">${esc(lang==='en'?answerEN(q):answer(q))}</div>`);c.scrollTop=c.scrollHeight}
 
 /* ---------- events ---------- */
 function bindView(){
@@ -1614,8 +1878,8 @@ function bindView(){
   const yq=document.getElementById('yq'); if(yq){yq.addEventListener('input',e=>{yf.q=e.target.value.trim();const p=e.target.selectionStart;render();const n=document.getElementById('yq');n.focus();n.setSelectionRange(p,p)})}
   const yo=document.getElementById('yo'); if(yo)yo.addEventListener('change',e=>{yf.oem=e.target.value;render()});
   const ys=document.getElementById('ys'); if(ys)ys.addEventListener('change',e=>{yf.st=e.target.value;render()});
-  const di=document.getElementById('dimg'); if(di)di.addEventListener('change',e=>{const fl=e.target.files[0];if(!fl)return;
-    document.getElementById('aisug').innerHTML=`<div class="card" style="border-color:var(--accent)"><span class="chip s-ai">AI gợi ý · mô phỏng</span><div style="margin-top:4px">Ảnh "${esc(fl.name)}": nghi <b>Xước</b>, vùng <b>06 · Cửa trước trái</b>, dài ~4 cm → mức 2. Độ tin cậy 0,87.</div><button class="btn" style="margin-top:6px" id="aiok">Dùng gợi ý</button></div>`;
+  const di=document.getElementById('dimg'); if(di)di.addEventListener('change',e=>{const fl=e.target.files[0];if(!fl)return;if(AIstate==='on'&&AIimg){aiDamage(fl);return}
+    document.getElementById('aisug').innerHTML=`<div class="card" style="border-color:var(--accent)"><span class="chip s-ai">AI gợi ý · mô phỏng</span> <span class="hint">${L("(mở trên Claude để AI đọc ảnh thật)","(open in Claude for real photo AI)")}</span><div style="margin-top:4px">Ảnh "${esc(fl.name)}": nghi <b>Xước</b>, vùng <b>06 · Cửa trước trái</b>, dài ~4 cm → mức 2. Độ tin cậy 0,87.</div><button class="btn" style="margin-top:6px" id="aiok">Dùng gợi ý</button></div>`;
     document.getElementById('aiok').onclick=()=>{dsel='06';render();document.getElementById('dt').value='01';document.getElementById('ds').value='2'}});
   const ds=document.getElementById('dsave'); if(ds)ds.addEventListener('click',()=>{dlog.unshift({a:dsel,t:document.getElementById('dt').value,s:document.getElementById('ds').value,p:document.getElementById('dp').value});dsel=null;render()});
 }

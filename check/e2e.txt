@@ -1,44 +1,21 @@
-AIstate=on mic=true
+AIstate=on azure=function
+
+TTS 200 ok=true giong=vi-VN-HoaiMyNeural mp3KB=80
 
 NÓI: tê em vê còn bao nhiêu xe chờ pê đê i
-HIỆN: 🎙 TMV còn bao nhiêu xe chờ PDI
 ĐÁP: 🎧 Hiểu là: TMV còn bao nhiêu xe chờ PDI.
 
 
-TMV hiện có 30 xe ở trạng thái Chờ PDI, và 7 xe đang PDI. Anh nên ưu tiên đưa vào PDI những xe có lệnh giao hết hạn hôm nay. Toàn bãi hiện có 10 lệnh như vậy.
+TMV hiện có 30 xe đang Chờ PDI, ngoài ra có 7 xe Đang PDI. Hôm nay có 10 lệnh giao hết hạn. Anh nên cho đội PDI ưu tiên các xe thuộc những lệnh này trước.🔊 Nghe
 
-NÓI: xe phốt nào tồn quá ba mươi ngày
-HIỆN: 🎙 xe Ford nào tồn quá ba mươi ngày
-ĐÁP: 🎧 Hiểu là: Xe Ford nào tồn quá 30 ngày.
-
-
-Ford có 21 xe tồn quá 30 ngày. Lâu nhất là Ranger ô D-04-12, 56 ngày, đang Chờ PDI. Tiếp theo là:
-• Ranger D-05-12, 49 ngày, bị chặn HQ
-• Ranger D-02-01, 41 ngày
-• Everest D-03-11, 37 ngày
-• Territory D-02-04, 32 ngày, đang Chờ PDI
-
-Anh nên cho làm PDI Ranger D-04-12 trước. Nên xử lý vướng HQ cho xe D-05-12.
+TTS 200 ok=true giong=vi-VN-HoaiMyNeural mp3KB=169
 
 NÓI: kho tám đang bị làm sao
-HIỆN: 🎙 Kho 8 đang bị làm sao
 ĐÁP: 🎧 Hiểu là: Kho 8 đang bị làm sao.
 
 
-Kho 8 đang cảnh báo nghiêm trọng. Nhiệt độ hiện -20.2°C, cài -24°C, lệch +3.8°C. Nhiệt độ đang tăng khoảng 0.64°C/giờ, dự kiến chạm -18°C sau khoảng 3.4 giờ. Nghi đóng băng dàn lạnh hoặc cửa cuốn mở nhiều. Mr Cường đã được báo cấp 1. Anh nên cho kỹ thuật kiểm tra và xả đá dàn lạnh ngay, đồng thời hạn chế mở cửa kho.
+Kho 8 đang cảnh báo nghiêm trọng. Nhiệt độ hiện -20.2°C, cài -24°C, lệch +3.8°C và đang tăng khoảng 0,64°C/giờ. Nếu cứ thế, khoảng 3,4 giờ nữa sẽ chạm -18°C, ngưỡng hỏng hàng đông lạnh. Nghi đóng băng dàn lạnh hoặc cửa cuốn mở nhiều, và đã báo cấp 1 cho Mr Cường. Anh nên cho kỹ thuật kiểm tra dàn lạnh ngay, đồng thời hạn chế mở cửa kho.🔊 Nghe
 
-NÓI: hàng tê en tê ích nào sắp hết hạn tái xuất
-HIỆN: 🎙 hàng TNTX nào sắp hết hạn tái xuất
-ĐÁP: 🎧 Hiểu là: Hàng TNTX nào sắp hết hạn tái xuất.
-
-
-Gấp nhất là tờ khai …4521 của Chủ hàng B: thịt bò đông lạnh, 12 pallet, còn 9 ngày. Hàng đã kiểm dịch và đi Lạng Sơn. Tờ khai gần nhất tiếp theo là …4610 (chân gà, 40 pallet), còn 38 ngày. Anh nên cho điều xe và chốt lịch đi Lạng Sơn cho …4521 sớm.
-
-NÓI: bạn đang dùng trí tuệ nhân tạo của hãng nào
-HIỆN: 🎙 bạn đang dùng trí tuệ nhân tạo của hãng nào
-ĐÁP: 🎧 Hiểu là: Bạn đang dùng trí tuệ nhân tạo của hãng nào.
-
-
-Em là Trợ lý AI HPS, trợ lý tích hợp trong hệ thống HPS. Chi tiết kỹ thuật do đơn vị triển khai cung cấp. Anh cần hỏi tiếp về xe trong bãi, kho lạnh, nhân lực hay lịch tàu thì cứ nói em nhé.
+audio src set=true
 
 errs=[]

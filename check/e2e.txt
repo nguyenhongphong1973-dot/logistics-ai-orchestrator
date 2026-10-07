@@ -1,0 +1,17 @@
+AIstate=on tools=true
+
+Q: Xếp lại bãi theo phương án tối ưu thì tiết kiệm được bao nhiêu giờ công mỗi năm?
+A: Theo phương án tối ưu, tiết kiệm 493 giờ công mỗi năm (giảm từ 30,8 giờ xuống 29,6 giờ cho 7 ngày), tương ứng 34 triệu VND chi phí. Cần di dời 33 xe để triển khai, giảm quãng đường từ 100,08 km xuống 96,15 km (tiết kiệm 3,9%).
+
+Việc cần làm: Lập kế hoạch di dời 33 xe trong thời gian hợp lý, ưu tiên các xe sắp xuất bãi để tránh double-handling.
+
+Q: Xe Ford nào tồn quá 30 ngày? Liệt kê 3 xe.
+A: Ba xe Ford tồn quá 30 ngày:
+
+1. MPBG4K7DJ3XHLTPEA (Ranger, D-04-12) – 56 ngày, Chờ PDI, xuất trong 10 ngày
+2. MNC1FYR6FV3BWMAA5 (Everest, D-03-11) – 37 ngày, Sẵn sàng, xuất trong 11 ngày
+3. MNCAY3939TPFA47PJ (Territory, D-02-04) – 32 ngày, Chờ PDI, xuất trong 16 ngày
+
+Cần ưu tiên PDI cho Ranger để sớm xuất bãi.
+
+errs=[]

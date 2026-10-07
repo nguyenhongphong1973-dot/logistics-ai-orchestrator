@@ -2,7 +2,7 @@ name: hps-ai-check
 on:
   push:
     branches: [hps-ai-check]
-    paths: ['.github/workflows/hps-ai-check.yml', 'check/trigger.txt']
+    paths: ['.github/workflows/hps-ai-check.yml', 'check/trigger.txt', 'check/e2e.js']
 permissions:
   contents: write
 jobs:
@@ -25,5 +25,6 @@ jobs:
           curl -s -w "\nHTTP %{http_code}\n" -X POST "$E" -H "Origin: https://evil.example" -H "content-type: application/json" -d '{"messages":[{"role":"user","content":"x"}]}' >> $R
           echo "== PREFLIGHT" >> $R
           curl -s -i -X OPTIONS "$E" -H "Origin: $O" -H "Access-Control-Request-Method: POST" | head -10 >> $R
+          npm i playwright@1 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1 && node check/e2e.js || echo e2e-failed >> $R
           git config user.name ci; git config user.email ci@users.noreply.github.com
-          git add check/result.txt; git commit -m "check result [skip ci]"; git push
+          git add check/result.txt check/e2e.txt check/e2e.png; git commit -m "check result [skip ci]"; git push
